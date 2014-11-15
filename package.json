@@ -1,0 +1,23 @@
+{
+  "name": "tictactoe",
+  "version": "0.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gjd24scientist/tictactoe.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gjd24scientist/tictactoe/issues"
+  },
+  "homepage": "https://github.com/gjd24scientist/tictactoe",
+  "dependencies": {
+    "express": "4.10.2",
+    "mongoose": "3.8.19",
+    "mongodb": "1.4.20"
+  }
+}
