@@ -1,7 +1,9 @@
 var isXTurn = true;
+var currentGrid = -1;
 var xBot = true;
 var oBot = false;
 var board = 0;
+var seq = [0];
 $(function() {
   $('body').append('<div id="game"></div>');
   $('#game').append('<div class="grid" id="grid"></div>');
@@ -15,11 +17,20 @@ $(function() {
   $('.button').click(function() {
     var parent = $(this).parent();
     var me = isXTurn ? 'X' : 'O';
+	var buttonNum = parseInt($(this).attr('id')[6]);
 
     if ($(this).is('.X-selected, .O-selected') || parent.is('.X-won, .O-won')) {
       return;
     }
     $(this).addClass(me + '-selected').html(me);
+	if(isXTurn){
+	  board += Math.pow(3, buttonNum);
+	}
+	else{
+	  board += 2*Math.pow(3, buttonNum);
+	}
+	seq.push(board);
+	console.log(seq);
     if (checkForWin($(this), ('.' + me + '-selected'))) {
       parent.addClass(me + '-won');
       window.alert(me + ' won!');
@@ -96,9 +107,14 @@ function Oturn(board) {
 }
 
 function resetGame() {
-    isXTurn = true;
-    $('div').removeClass('X-won O-won no-win X-selected O-selected');
-    $('.button').html('');
+  isXTurn = true;
+  currentGrid = -1;
+  xBot = true;
+  oBot = false;
+  board = 0;
+  seq = [0];
+  $('div').removeClass('X-won O-won no-win X-selected O-selected');
+  $('.button').html('');
   if (xBot) {
     Xturn(board);
   }
