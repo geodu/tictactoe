@@ -35,10 +35,10 @@ $(function() {
 
     isXTurn = !isXTurn;
 
-    if(isXTurn && xBot){
+    if (isXTurn && xBot) {
       Xturn(board);
     }
-    if(!isXTurn && oBot){
+    if (!isXTurn && oBot) {
       Oturn(board);
     }
   });
@@ -77,20 +77,20 @@ function Xmove(board) {
   }
 }
 
-function Xturn(board){
+function Xturn(board) {
   $('#button' + Xmove(board)).trigger("click");
   return;
 }
 
 function Omove(board) {
-  for (var i = 0; i < 9; i++){
+  for (var i = 0; i < 9; i++) {
     if (!$('#button' + i).is('.X-selected, .O-selected')){
       return i;
     }
   }
 }
 
-function Oturn(board){
+function Oturn(board) {
   $('#button' + Omove(board)).trigger("click");
   return;
 }

@@ -2,6 +2,11 @@ var express = require('express');
 var path = require('path');
 var app = express();
 
+var bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+
 var mongo = require('mongodb');
 var mongoose = require('mongoose');
 var connectionString = process.env.OPENSHIFT_MONGODB_DB_URL || 'mongodb://localhost/tictactoe';
@@ -14,9 +19,8 @@ db.once('open', function callback () {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', function(request, response) {
-  response.sendFile(path.join(__dirname, '/public/ttt.html'));
-});
+var routes = require('./routes/routes');
+app.use('/model', routes);
 
 app.listen(process.env.OPENSHIFT_NODEJS_PORT || 8080,
   process.env.OPENSHIFT_NODEJS_IP);
