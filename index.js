@@ -20,7 +20,7 @@ db.once('open', function callback () {
 app.use(express.static(path.join(__dirname, 'public')));
 
 var routes = require('./routes/routes');
-app.use('/model', routes);
+app.use('/models', routes);
 
 app.listen(process.env.OPENSHIFT_NODEJS_PORT || 8080,
   process.env.OPENSHIFT_NODEJS_IP);

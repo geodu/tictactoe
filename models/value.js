@@ -4,7 +4,8 @@ var valueSchema = new mongoose.Schema({
   name: String,
   values: [{
     key: Number,
-    value: Number
+    value: Number,
+    occurrences: Number
   }]
 });
 

@@ -3,8 +3,8 @@ var path = require('path');
 var router = express.Router();
 var Value = require('../models/value');
 
-router.get('/', function(request, response) {
-  Value.findOne({name: 'tictactoe'}, function(err, doc) {
+router.get('/mc', function(request, response) {
+  Value.findOne({name: 'monte carlo'}, function(err, doc) {
     out = {};
     for (var i = 0; i < doc.values.length; i++) {
       out[doc.values[i].key] = doc.values[i].value;
@@ -13,7 +13,7 @@ router.get('/', function(request, response) {
   });
 });
 
-router.post('/', function(request, response) {
+router.post('/mc', function(request, response) {
   var keys = request.body.keys;
   var values = request.body.values;
   var inputs = [];
@@ -23,7 +23,7 @@ router.post('/', function(request, response) {
       value: values[i]
     });
   }
-  Value.findOne({name: 'tictactoe'}, function(err, doc) {
+  Value.findOne({name: 'monte carlo'}, function(err, doc) {
     var values = doc.values;
     var lookup = {};
     for (var i = 0; i < values.length; i++) {
@@ -32,16 +32,17 @@ router.post('/', function(request, response) {
     for (var i = 0; i < inputs.length; i++) {
       if (lookup[inputs[i].key]) {
         console.log('existing');
-        console.log(lookup[inputs[i].key]);
-        lookup[inputs[i].key].value = inputs[i].value;
+        element = lookup[inputs[i].key];
+        element.value = (element.value * element.occurrences + parseInt(inputs[i].value)) / (element.occurrences + 1.0);
+        element.occurrences += 1;
       }
       else {
         lookup[inputs[i].key] = {
           key: inputs[i].key,
-          value: inputs[i].value
+          value: inputs[i].value,
+          occurrences: 1
         };
         console.log('nonexistent');
-        console.log(lookup[inputs[i].key]);
         values.push(lookup[inputs[i].key]);
       }
     }
@@ -51,10 +52,10 @@ router.post('/', function(request, response) {
   });
 });
 
-router.put('/', function(request, response) {
-  Value.remove({name: 'tictactoe'}, function(err, doc) {});
+router.put('/mc', function(request, response) {
+  Value.remove({name: 'monte carlo'}, function(err, doc) {});
   var newModel = new Value({
-    name: 'tictactoe',
+    name: 'monte carlo',
     values: []
   });
   newModel.save(function(err, doc) {
