@@ -46,7 +46,7 @@ function Xmove(board, model, opt) {
 
 function Omove(board, model, opt) {
   //return smartMove(board, model, 2, opt);
-  return randMove();
+  return randMove(board);
 }
 
 function smartMove(board, model, turn, opt)
@@ -69,7 +69,7 @@ function smartMove(board, model, turn, opt)
   	  if (move[i] > move[argmax]) {
   		  argmax = i;
   	  }
-      sum += move[i]+1;
+      sum += move[i]+2;
     }
   }
   if(opt === true){
@@ -79,7 +79,7 @@ function smartMove(board, model, turn, opt)
     var ran = Math.random();
   	for (var i = 0; i < 9; i++) {
   	  if(!boardArray[i]) {
-  	    cutoff += (move[i]+1)/sum;
+  	    cutoff += (move[i]+2)/sum;
     		if(cutoff > ran) {
     		  return i;
     		}
@@ -88,7 +88,8 @@ function smartMove(board, model, turn, opt)
   }
 }
 
-function randMove() {
+function randMove(board) {
+  var boardArray = boardToArray(board);
   var sum = 0;
   var cutoff = 0;
   for (var i = 0; i < 9; i++) {

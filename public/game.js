@@ -20,6 +20,30 @@ $(function() {
     }
   }
 
+  var handleWin = function(win, winner, parent, seq) {
+    var vals = [];
+    for (var i=0; i<seq.length; i++) {
+      vals.push(win);
+      win = -win;
+    }
+    parent.addClass(winner + '-won');
+    $.ajax({
+      type: 'POST',
+      url: CONNECTION_STRING,
+      dataType: 'json',
+      data: { keys: seq, values: vals },
+      success : function(data) {
+        //console.log(data);
+      },
+      failure : function(err) {
+        //console.log('failed');
+      }
+    });
+    if (!oBot || !xBot) {
+      window.alert(winner + ' won!');
+    }
+    resetGame();
+  }
   $('.button').click(function() {
     var parent = $(this).parent();
     var me = isXTurn ? 'X' : 'O';
@@ -37,51 +61,12 @@ $(function() {
   	}
   	seq.push(boardToNormalForm(board));
     if (checkForWin($(this), ('.' + me + '-selected'))) {
-      var vals = [];
       var win = me === 'X' ? 1 : -1;
-      for (var i=0; i<seq.length; i++) {
-        vals.push(win);
-        win = -win;
-      }
-      console.log(vals);
-      parent.addClass(me + '-won');
-      $.ajax({
-        type: 'POST',
-        url: CONNECTION_STRING,
-        dataType: 'json',
-        data: { keys: seq, values: vals },
-        success : function(data) {
-          console.log(data);
-        },
-        failure : function(err) {
-          console.log('failed');
-        }
-      });
-      window.alert(me + ' won!');
-      resetGame();
+      handleWin(win, me, parent, seq);
       return;
     }
     else if (parent.children('.X-selected, .O-selected').length === 9) {
-      var vals = [];
-      for (var i=0; i<seq.length; i++) {
-        vals.push(0);
-      }
-      console.log(vals);
-      parent.addClass('no-win');
-      $.ajax({
-        type: 'POST',
-        url: CONNECTION_STRING,
-        dataType: 'json',
-        data: { keys: seq, values: vals },
-        success : function(data) {
-          console.log(data);
-        },
-        failure : function(err) {
-          console.log('failed');
-        }
-      });
-      window.alert('Draw');
-      resetGame();
+      handleWin(0, 'No one', parent, seq);
       return;
     }
 
@@ -93,6 +78,7 @@ $(function() {
     if (!isXTurn && oBot) {
       Oturn(board);
     }
+    console.log('done');
   });
 
   function checkForWin(elem, match) {
@@ -120,7 +106,8 @@ $(function() {
 });
 
 function Xturn(board) {
-  $('#button' + Xmove(board, model)).trigger("click");
+  // use opt
+  $('#button' + Xmove(board, model, true)).trigger("click");
   return;
 }
 
@@ -145,7 +132,7 @@ function resetGame() {
       model = data;
     },
     failure : function(err) {
-      console.log('failed');
+      //console.log('failed');
     }
   });
   $('div').removeClass('X-won O-won no-win X-selected O-selected');
