@@ -2,12 +2,14 @@
 var CONNECTION_STRING = 'http://localhost:8080/models/mc'
 
 // Game variables
-var isXTurn = true;
-var currentGrid = -1;
-var xBot = true;
-var oBot = false;
-var board = 0;
-var seq = [];
+var isXTurn;
+var currentGrid;
+var xBot;
+var oBot;
+var board;
+var seq;
+var model;
+
 $(function() {
   $('body').append('<div id="game"></div>');
   $('#game').append('<div class="grid" id="grid"></div>');
@@ -17,6 +19,8 @@ $(function() {
       $('#grid').append('<br />');
     }
   }
+
+  resetGame();
 
   $('.button').click(function() {
     var parent = $(this).parent();
@@ -63,7 +67,7 @@ $(function() {
       var vals = [];
       for (var i=0; i<seq.length; i++) {
         vals.push(0);
-      }    
+      }
       console.log(vals);
       parent.addClass('no-win');
       $.ajax({
@@ -136,6 +140,17 @@ function resetGame() {
   oBot = false;
   board = 0;
   seq = [];
+  $.ajax({
+    type: 'GET',
+    url: CONNECTION_STRING,
+    datatype: 'json',
+    success : function(data) {
+      model = data;
+    },
+    failure : function(err) {
+      console.log('failed');
+    }
+  });
   $('div').removeClass('X-won O-won no-win X-selected O-selected');
   $('.button').html('');
   if (xBot) {
