@@ -41,35 +41,40 @@ function arrayToBoard(boardArray, rotationNum){
 }
 
 function Xmove(board, model, opt) {
-  console.log("hi");
   var boardArray = boardToArray(board);
   var move = [];
+  move[-1] = -10;
   var argmax = -1;
   var sum = 0;
   var cutoff = 0;
   for (var i = 0; i < 9; i++) {
     if (!boardArray[i]) {
-      move[i] = model[boardToNormalForm(board+Math.pow(3,i))];
-	  if (move[i] > move[argmax]){
-		argmax = i;
-	  }
-	  sum += move[i]+1;
+      var childBoard = boardToNormalForm(board+Math.pow(3,i));
+      if (model[childBoard]) {
+        move[i] = model[childBoard];
+      }
+      else { // model does not contain childBoard
+        move[i] = 0;
+      }
+  	  if (move[i] > move[argmax]) {
+  		  argmax = i;
+  	  }
+      sum += move[i]+1;
     }
   }
-  
   if(opt === true){
     return argmax;
   }
   else{
     var ran = Math.random();
-	for (var i = 0; i < 9; i++) {
-	  if(!boardArray[i]) {
-	    cutoff += (move[i]+1)/sum;
-		if(cutoff > ran) {
-		  return i;
-		}
-	  }
-	}
+  	for (var i = 0; i < 9; i++) {
+  	  if(!boardArray[i]) {
+  	    cutoff += (move[i]+1)/sum;
+    		if(cutoff > ran) {
+    		  return i;
+    		}
+  	  }
+  	}
   }
 }
 
@@ -82,25 +87,24 @@ function Omove(board, model, opt) {
   for (var i = 0; i < 9; i++) {
     if (!boardArray[i]) {
       move[i] = model[boardToNormalForm(board+2*Math.pow(3,i))];
-	  if (move[i] > move[argmax]){
-		argmax = i;
-	  }
-	  sum += move[i]+1;
+  	  if (move[i] > move[argmax]){
+  		  argmax = i;
+  	  }
+  	  sum += move[i]+1;
     }
   }
-  
   if(opt === true){
     return argmax;
   }
   else{
     var ran = Math.random();
-	for (var i = 0; i < 9; i++) {
-	  if(!boardArray[i]) {
-	    cutoff += (move[i]+1)/sum;
-		if(cutoff > ran) {
-		  return i;
-		}
-	  }
-	}
+  	for (var i = 0; i < 9; i++) {
+  	  if(!boardArray[i]) {
+  	    cutoff += (move[i]+1)/sum;
+    		if(cutoff > ran) {
+    		  return i;
+    		}
+  	  }
+  	}
   }
 }

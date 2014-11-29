@@ -21,6 +21,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 var routes = require('./routes/routes');
 app.use('/models', routes);
+app.use('/', function(request, response) {
+  response.sendFile(path.join(__dirname, 'public/ttt.html'));
+});
 
 app.listen(process.env.OPENSHIFT_NODEJS_PORT || 8080,
   process.env.OPENSHIFT_NODEJS_IP);

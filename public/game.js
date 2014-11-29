@@ -20,8 +20,6 @@ $(function() {
     }
   }
 
-  resetGame();
-
   $('.button').click(function() {
     var parent = $(this).parent();
     var me = isXTurn ? 'X' : 'O';
@@ -97,10 +95,6 @@ $(function() {
     }
   });
 
-  if (xBot) {
-    Xturn(board);
-  }
-
   function checkForWin(elem, match) {
     var index = +(elem.attr('id').slice(-1));
     var prefix = '#button';
@@ -121,6 +115,8 @@ $(function() {
     }
     return false;
   }
+
+  resetGame();
 });
 
 function Xturn(board) {
@@ -142,6 +138,7 @@ function resetGame() {
   seq = [];
   $.ajax({
     type: 'GET',
+    async: false,
     url: CONNECTION_STRING,
     datatype: 'json',
     success : function(data) {
