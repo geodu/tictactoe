@@ -17,10 +17,13 @@ function boardToNormalForm(board){
     newBoard = arrayToBoard(boardArray, rotation[i])
     if (newBoard < minBoard){
       minBoard = newBoard;
-	  rotationNum = i
+	  rotationNum = i;
     }
   }
-  return minBoard;
+  return {
+    board: minBoard,
+    rotation: rotation[rotationNum]
+  }
 }
 
 function boardToArray(board) {
@@ -50,7 +53,7 @@ function Xmove(board) {
 }
 
 function Omove(board) {
-  var boardArray = boardToArray(board);
+  var boardArray = boardToArray(board).board;
   for (var i = 0; i < 9; i++) {
     if (!boardArray[i]) {
       return i;

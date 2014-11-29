@@ -33,7 +33,7 @@ $(function() {
   	else {
   	  board += 2 * Math.pow(3, buttonNum);
   	}
-  	seq.push(board);
+  	seq.push(boardToNormalForm(board).board);
     if (checkForWin($(this), ('.' + me + '-selected'))) {
       var vals = [];
       var win = me === 'X' ? 1 : -1;
