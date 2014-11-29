@@ -20,10 +20,7 @@ function boardToNormalForm(board){
 	  rotationNum = i;
     }
   }
-  return {
-    board: minBoard,
-    rotation: rotation[rotationNum]
-  }
+  return minBoard;
 }
 
 function boardToArray(board) {
@@ -43,20 +40,67 @@ function arrayToBoard(boardArray, rotationNum){
   return board;
 }
 
-function Xmove(board) {
+function Xmove(board, model, opt) {
+  console.log("hi");
   var boardArray = boardToArray(board);
+  var move = [];
+  var argmax = -1;
+  var sum = 0;
+  var cutoff = 0;
   for (var i = 0; i < 9; i++) {
     if (!boardArray[i]) {
-      return i;
+      move[i] = model[boardToNormalForm(board+Math.pow(3,i))];
+	  if (move[i] > move[argmax]){
+		argmax = i;
+	  }
+	  sum += move[i]+1;
     }
+  }
+  
+  if(opt === true){
+    return argmax;
+  }
+  else{
+    var ran = Math.random();
+	for (var i = 0; i < 9; i++) {
+	  if(!boardArray[i]) {
+	    cutoff += (move[i]+1)/sum;
+		if(cutoff > ran) {
+		  return i;
+		}
+	  }
+	}
   }
 }
 
-function Omove(board) {
-  var boardArray = boardToArray(board).board;
+function Omove(board, model, opt) {
+  var boardArray = boardToArray(board);
+  var move = [];
+  var argmax = -1;
+  var sum = 0;
+  var cutoff = 0;
   for (var i = 0; i < 9; i++) {
     if (!boardArray[i]) {
-      return i;
+      move[i] = model[boardToNormalForm(board+2*Math.pow(3,i))];
+	  if (move[i] > move[argmax]){
+		argmax = i;
+	  }
+	  sum += move[i]+1;
     }
+  }
+  
+  if(opt === true){
+    return argmax;
+  }
+  else{
+    var ran = Math.random();
+	for (var i = 0; i < 9; i++) {
+	  if(!boardArray[i]) {
+	    cutoff += (move[i]+1)/sum;
+		if(cutoff > ran) {
+		  return i;
+		}
+	  }
+	}
   }
 }

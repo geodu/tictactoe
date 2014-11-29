@@ -37,7 +37,7 @@ $(function() {
   	else {
   	  board += 2 * Math.pow(3, buttonNum);
   	}
-  	seq.push(boardToNormalForm(board).board);
+  	seq.push(boardToNormalForm(board));
     if (checkForWin($(this), ('.' + me + '-selected'))) {
       var vals = [];
       var win = me === 'X' ? 1 : -1;
@@ -124,12 +124,12 @@ $(function() {
 });
 
 function Xturn(board) {
-  $('#button' + Xmove(board)).trigger("click");
+  $('#button' + Xmove(board, model)).trigger("click");
   return;
 }
 
 function Oturn(board) {
-  $('#button' + Omove(board)).trigger("click");
+  $('#button' + Omove(board, model)).trigger("click");
   return;
 }
 
