@@ -46,7 +46,7 @@ function Xmove(board, model, opt) {
 
 function Omove(board, model, opt) {
   //return smartMove(board, model, 2, opt);
-  return randMove(board);
+  return smartMove(board, model, 2, opt);
 }
 
 function smartMove(board, model, turn, opt)

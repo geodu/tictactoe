@@ -1,7 +1,7 @@
 var express = require('express');
 var path = require('path');
 var router = express.Router();
-var Value = require('../models/value');
+var Value = require('../models/value').Value;
 
 router.get('/mc', function(request, response) {
   Value.findOne({name: 'monte carlo'}, function(err, doc) {
@@ -61,10 +61,6 @@ router.put('/mc', function(request, response) {
   newModel.save(function(err, doc) {
     response.json({success: true});
   });
-});
-
-router.get('/', function(request, response) {
-  response.sendFile(path.join(__dirname, '../public/ttt.html'));
 });
 
 module.exports = router;

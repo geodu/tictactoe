@@ -1,6 +1,3 @@
-// Constants
-var CONNECTION_STRING = 'http://localhost:8080/models/mc'
-
 // Game variables
 var isXTurn;
 var currentGrid;
@@ -27,18 +24,7 @@ $(function() {
       win = -win;
     }
     parent.addClass(winner + '-won');
-    $.ajax({
-      type: 'POST',
-      url: CONNECTION_STRING,
-      dataType: 'json',
-      data: { keys: seq, values: vals },
-      success : function(data) {
-        //console.log(data);
-      },
-      failure : function(err) {
-        //console.log('failed');
-      }
-    });
+    sendMC(seq, vals);
     if (!oBot || !xBot) {
       window.alert(winner + ' won!');
     }
@@ -78,7 +64,6 @@ $(function() {
     if (!isXTurn && oBot) {
       Oturn(board);
     }
-    console.log('done');
   });
 
   function checkForWin(elem, match) {
@@ -106,38 +91,30 @@ $(function() {
 });
 
 function Xturn(board) {
-  // use opt
+  // do not use opt
   $('#button' + Xmove(board, model, true)).trigger("click");
   return;
 }
 
 function Oturn(board) {
-  $('#button' + Omove(board, model)).trigger("click");
+  // use opt
+  $('#button' + Omove(board, model, true)).trigger("click");
   return;
 }
 
 function resetGame() {
   isXTurn = true;
   currentGrid = -1;
-  xBot = true;
-  oBot = false;
+  xBot = false;
+  oBot = true;
   board = 0;
   seq = [];
-  $.ajax({
-    type: 'GET',
-    async: false,
-    url: CONNECTION_STRING,
-    datatype: 'json',
-    success : function(data) {
-      model = data;
-    },
-    failure : function(err) {
-      //console.log('failed');
+  getMC(function(data) {
+    model = data;
+    if (xBot) {
+      Xturn(board);
     }
   });
   $('div').removeClass('X-won O-won no-win X-selected O-selected');
   $('.button').html('');
-  if (xBot) {
-    Xturn(board);
-  }
 }

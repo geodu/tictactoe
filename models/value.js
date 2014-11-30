@@ -9,6 +9,14 @@ var valueSchema = new mongoose.Schema({
   }]
 });
 
-var val = mongoose.model('Value', valueSchema);
+var weightSchema = new mongoose.Schema({
+  weights: [Number]
+});
 
-module.exports = val;
+var val = mongoose.model('Value', valueSchema);
+var wei = mongoose.model('Weight', weightSchema);
+
+module.exports = {
+  Value: val,
+  Weight: wei
+}
