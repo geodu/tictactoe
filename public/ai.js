@@ -163,7 +163,45 @@ function updateWeight(newWeight, predictNew, predict, gradient, alpha){
   return newWeight;
 }
 
-function TDmove() {
+// combine with smart move?
+function TDmove(board, weight, turn, opt) {
+  var boardArray = boardToArray(board);
+  var move = [];
+  move[-1] = -10;
+  var argmax = -1;
+  var sum = 0;
+  var cutoff = 0;
+  for (var i = 0; i < 9; i++) {
+    if (!boardArray[i]) {
+      var childBoard = boardToNormalForm(board+turn*Math.pow(3,i)); // nessessary???
+      move[i] = valueofBoard(childBoard,weight);
+  	  if (move[i] > move[argmax]) {
+  		  argmax = i;
+  	  }
+      sum += move[i]+1; // what value for 1 ??
+    }
+  }
+  if(opt === true){
+    return argmax;
+  }
+  else{
+    var ran = Math.random();
+  	for (var i = 0; i < 9; i++) {
+  	  if(!boardArray[i]) {
+  	    cutoff += (move[i]+1)/sum;
+    		if(cutoff > ran) {
+    		  return i;
+    		}
+  	  }
+  	}
+  }
+}
 
+function TDXmove(board, weight) {
+  return TDmove(board, weight, 1);
+}
+
+function TDOmove(board, weight) {
+  return TDmove(board, weight, 2);
 }
 
