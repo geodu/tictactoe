@@ -163,7 +163,24 @@ function updateWeight(newWeight, predictNew, predict, gradient, alpha){
   return newWeight;
 }
 
-// combine with smart move?
+
+function TDmove(board, weight, turn, opt) {
+  function model(b){
+    return valueofBoard(b,weight);
+  }
+  return smartMove(board, model, turn, opt);
+}
+
+function TDXmove(board, weight, opt) {
+  return TDmove(board, weight, 1, opt);
+}
+
+function TDOmove(board, weight, opt) {
+  return TDmove(board, weight, 2, opt);
+}
+
+
+/* combined with smart move hopefully works
 function TDmove(board, weight, turn, opt) {
   var boardArray = boardToArray(board);
   var move = [];
@@ -195,13 +212,5 @@ function TDmove(board, weight, turn, opt) {
   	  }
   	}
   }
-}
-
-function TDXmove(board, weight) {
-  return TDmove(board, weight, 1);
-}
-
-function TDOmove(board, weight) {
-  return TDmove(board, weight, 2);
-}
+} */
 
