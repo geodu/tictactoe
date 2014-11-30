@@ -109,31 +109,50 @@ function randMove(board) {
   }
 }
 
-function valueOfBoard(board, weight) {
+function valueAndGradientOfBoard(board, weight) {
   var input = boardToArray(board);
   var changeEntries = [0.5, 1, 0];
   for(var i=0; i<9; i++){
     input[i] = changeEntries[inputs[i]];
   }
-  var hidden = []
+  var hidden = [];
+  var hiddensum = [];
   for(var i=0; i<4; i++) {
-    hidden[i] = 0;
+    hiddensum[i] = 0;
     for(var j=0; j<9; j++) {
-      hidden[i] += weight[9*i+j]*input[j];
+      hiddensum[i] += weight[9*i+j]*input[j];
     }
-    hidden[i] = 1/(1+Math.pow(Math.E, -hidden[i]));
+    hidden[i] = 1/(1+Math.pow(Math.E, -hiddensum[i]));
   }
   
   var output = 0;
+  var outputsum = 0;
   for(var i=0; i<4; i++) {
-    output += weight[36+i]*hidden[i];
+    outputsum += weight[36+i]*hidden[i];
   }
-  output = 1/(1+Math.pow(Math.E, -output));
-  return output
+  output = 1/(1+Math.pow(Math.E, -outputsum));
+  
+  var gradient = [];
+  for(var i=0; i<4; i++) {
+    gradient[36+i] = Math.log(1+Math.pow(Math.E, -outputsum))*Math.pow(Math.E, -outputsum)*(-hidden[i]);
+  }
+  
+  for(var i=0; i<4; i++) {
+    for(var j=0; j<9; j++) {
+      gradient[9*i+j] = Math.log(1+Math.pow(Math.E, -hidden[i]))*Math.pow(Math.E, -hidden[i])*(-input[j])*gradient[36+i];
+    }
+  }
+  
+  return [output, gradient];
+  
+}
+
+function valueofBoard(board, weight) {
+  return valueAndGradientOfBoard(board, weight)[0];
 }
 
 function gradientOfBoard(board, weight){
-
+  return valueAndGradientOfBoard(board, weight)[1];
 }
 
 //need predict to be 1 for a winning board
@@ -142,5 +161,9 @@ function updateWeight(newWeight, predictNew, predict, gradient, alpha){
     newWeight[i] = newWeight[i] + alpha*(predictNew - predict)*gradient[i];
   }
   return newWeight;
+}
+
+function TDmove() {
+
 }
 
