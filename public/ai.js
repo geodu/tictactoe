@@ -108,3 +108,39 @@ function randMove(board) {
     }
   }
 }
+
+function valueOfBoard(board, weight) {
+  var input = boardToArray(board);
+  var changeEntries = [0.5, 1, 0];
+  for(var i=0; i<9; i++){
+    input[i] = changeEntries[inputs[i]];
+  }
+  var hidden = []
+  for(var i=0; i<4; i++) {
+    hidden[i] = 0;
+    for(var j=0; j<9; j++) {
+      hidden[i] += weight[9*i+j]*input[j];
+    }
+    hidden[i] = 1/(1+Math.pow(Math.E, -hidden[i]));
+  }
+  
+  var output = 0;
+  for(var i=0; i<4; i++) {
+    output += weight[36+i]*hidden[i];
+  }
+  output = 1/(1+Math.pow(Math.E, -output));
+  return output
+}
+
+function gradientOfBoard(board, weight){
+
+}
+
+//need predict to be 1 for a winning board
+function updateWeight(newWeight, predictNew, predict, gradient, alpha){
+  for(var i=0; i<40; i++){
+    newWeight[i] = newWeight[i] + alpha*(predictNew - predict)*gradient[i];
+  }
+  return newWeight;
+}
+
