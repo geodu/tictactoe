@@ -10,6 +10,7 @@ var valueSchema = new mongoose.Schema({
 });
 
 var weightSchema = new mongoose.Schema({
+  name: String,
   weights: [Number]
 });
 

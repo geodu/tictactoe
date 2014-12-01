@@ -41,12 +41,16 @@ function arrayToBoard(boardArray, rotationNum){
 }
 
 function Xmove(board, model, opt) {
-  return smartMove(board, model, 1, opt);
+  return smartMove(board, function(b) {
+    return model[b] + 1.1;
+  }, 1, opt);
 }
 
 function Omove(board, model, opt) {
   //return smartMove(board, model, 2, opt);
-  return smartMove(board, model, 2, opt);
+  return smartMove(board, function(b) {
+    return model[b] + 1.1;
+  }, 2, opt);
 }
 
 function smartMove(board, model, turn, opt)
@@ -60,16 +64,16 @@ function smartMove(board, model, turn, opt)
   for (var i = 0; i < 9; i++) {
     if (!boardArray[i]) {
       var childBoard = boardToNormalForm(board+turn*Math.pow(3,i));
-      if (model[childBoard]) {
-        move[i] = model[childBoard];
+      if (model(childBoard)) {
+        move[i] = model(childBoard);
       }
       else { // model does not contain childBoard
-        move[i] = 0;
+        move[i] = 1.1;
       }
   	  if (move[i] > move[argmax]) {
   		  argmax = i;
   	  }
-      sum += move[i]+2;
+      sum += move[i];
     }
   }
   if(opt === true){
@@ -79,7 +83,7 @@ function smartMove(board, model, turn, opt)
     var ran = Math.random();
   	for (var i = 0; i < 9; i++) {
   	  if(!boardArray[i]) {
-  	    cutoff += (move[i]+2)/sum;
+  	    cutoff += (move[i])/sum;
     		if(cutoff > ran) {
     		  return i;
     		}
@@ -113,7 +117,7 @@ function valueAndGradientOfBoard(board, weight) {
   var input = boardToArray(board);
   var changeEntries = [0.5, 1, 0];
   for(var i=0; i<9; i++){
-    input[i] = changeEntries[inputs[i]];
+    input[i] = changeEntries[input[i]];
   }
   var hidden = [];
   var hiddensum = [];
@@ -122,7 +126,7 @@ function valueAndGradientOfBoard(board, weight) {
     for(var j=0; j<9; j++) {
       hiddensum[i] += weight[9*i+j]*input[j];
     }
-    hidden[i] = 1/(1+Math.pow(Math.E, -hiddensum[i]));
+    hidden[i] = 1/(1+Math.exp(-hiddensum[i]));
   }
   
   var output = 0;
@@ -130,43 +134,37 @@ function valueAndGradientOfBoard(board, weight) {
   for(var i=0; i<4; i++) {
     outputsum += weight[36+i]*hidden[i];
   }
-  output = 1/(1+Math.pow(Math.E, -outputsum));
+  output = 1/(1+Math.exp(-outputsum));
   
   var gradient = [];
   for(var i=0; i<4; i++) {
-    gradient[36+i] = Math.log(1+Math.pow(Math.E, -outputsum))*Math.pow(Math.E, -outputsum)*(-hidden[i]);
+    gradient[36+i] = Math.log(1+Math.exp(-outputsum))*Math.exp(-outputsum)*(-hidden[i]);
   }
   
   for(var i=0; i<4; i++) {
     for(var j=0; j<9; j++) {
-      gradient[9*i+j] = Math.log(1+Math.pow(Math.E, -hidden[i]))*Math.pow(Math.E, -hidden[i])*(-input[j])*gradient[36+i];
+      gradient[9*i+j] = Math.log(1+Math.exp(-hidden[i]))*Math.exp(-hidden[i])*(-input[j])*gradient[36+i];
     }
   }
   
-  return [output, gradient];
+  return {
+    output: output,
+    gradient: gradient
+  };
   
-}
-
-function valueofBoard(board, weight) {
-  return valueAndGradientOfBoard(board, weight)[0];
-}
-
-function gradientOfBoard(board, weight){
-  return valueAndGradientOfBoard(board, weight)[1];
 }
 
 //need predict to be 1 for a winning board
 function updateWeight(newWeight, predictNew, predict, gradient, alpha){
-  for(var i=0; i<40; i++){
+  for(var i=0; i<40; i++) {
     newWeight[i] = newWeight[i] + alpha*(predictNew - predict)*gradient[i];
   }
-  return newWeight;
 }
 
 
 function TDmove(board, weight, turn, opt) {
-  function model(b){
-    return valueofBoard(b,weight);
+  function model(b) {
+    return valueAndGradientOfBoard(b,weight).output;
   }
   return smartMove(board, model, turn, opt);
 }
@@ -190,7 +188,7 @@ function TDmove(board, weight, turn, opt) {
   var cutoff = 0;
   for (var i = 0; i < 9; i++) {
     if (!boardArray[i]) {
-      var childBoard = boardToNormalForm(board+turn*Math.pow(3,i)); // nessessary???
+      var childBoard = boardToNormalForm(board+turn*Math.pow(3,i)); // necessary???
       move[i] = valueofBoard(childBoard,weight);
   	  if (move[i] > move[argmax]) {
   		  argmax = i;

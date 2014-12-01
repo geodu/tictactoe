@@ -2,6 +2,7 @@ var express = require('express');
 var path = require('path');
 var router = express.Router();
 var Value = require('../models/value').Value;
+var Weight = require('../models/value').Weight;
 
 router.get('/mc', function(request, response) {
   Value.findOne({name: 'monte carlo'}, function(err, doc) {
@@ -57,6 +58,33 @@ router.put('/mc', function(request, response) {
   var newModel = new Value({
     name: 'monte carlo',
     values: []
+  });
+  newModel.save(function(err, doc) {
+    response.json({success: true});
+  });
+});
+
+router.get('/td0', function(request, response) {
+  Weight.findOne({name: 'TD0'}, function(err, doc) {
+    response.json(doc.weights);
+  });
+});
+
+router.post('/td0', function(request, response) {
+  var weights = request.body.weights;
+  Weight.findOne({name: 'TD0'}, function(err, doc) {
+    doc.weights = weights.map(Number);
+    doc.save(function(err, doc) {
+      response.json({success: true});
+    });
+  });
+});
+
+router.put('/td0', function(request, response) {
+  Weight.remove({name: 'TD0'}, function(err, doc) {});
+  var newModel = new Weight({
+    name: 'TD0',
+    weights: []
   });
   newModel.save(function(err, doc) {
     response.json({success: true});
