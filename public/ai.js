@@ -1,3 +1,15 @@
+function sigmoid(x) {
+  if (x < -10) {
+    return 0;
+  }
+  else if (x > 10) {
+    return 1;
+  }
+  else {
+    return 1.0 / (1 + Math.exp(-x));
+  }
+}
+
 function boardToNormalForm(board){
   var boardArray = boardToArray(board);
   var minBoard = board;
@@ -114,36 +126,39 @@ function randMove(board) {
 }
 
 function valueAndGradientOfBoard(board, weight) {
-  var input = boardToArray(board);
-  var changeEntries = [0.5, 1, 0];
-  for(var i=0; i<9; i++){
-    input[i] = changeEntries[input[i]];
+  var input = [];
+  var boardArray = boardToArray(board);
+  var changeEntries = [0.0, 1.0, 0.0];
+  var changeEntries2 = [0.0, 0.0, 1.0];
+  for(var i=0; i<9; i++) {
+    input[i] = changeEntries[boardArray[i]];
+    input[i + 9] = changeEntries2[boardArray[i]];
   }
   var hidden = [];
   var hiddensum = [];
-  for(var i=0; i<4; i++) {
+  for(var i=0; i<8; i++) {
     hiddensum[i] = 0;
-    for(var j=0; j<9; j++) {
-      hiddensum[i] += weight[9*i+j]*input[j];
+    for(var j=0; j<18; j++) {
+      hiddensum[i] += weight[18*i+j]*input[j];
     }
-    hidden[i] = 1/(1+Math.exp(-hiddensum[i]));
+    hidden[i] = sigmoid(hiddensum[i]);
   }
   
   var output = 0;
   var outputsum = 0;
-  for(var i=0; i<4; i++) {
-    outputsum += weight[36+i]*hidden[i];
+  for(var i=0; i<8; i++) {
+    outputsum += weight[144+i]*hidden[i];
   }
-  output = 1/(1+Math.exp(-outputsum));
+  output = sigmoid(outputsum);
   
   var gradient = [];
-  for(var i=0; i<4; i++) {
-    gradient[36+i] = Math.log(1+Math.exp(-outputsum))*Math.exp(-outputsum)*(-hidden[i]);
+  for(var i=0; i<8; i++) {
+    gradient[144+i] = Math.pow(output,2)*Math.exp(-outputsum)*hidden[i];
   }
   
-  for(var i=0; i<4; i++) {
-    for(var j=0; j<9; j++) {
-      gradient[9*i+j] = Math.log(1+Math.exp(-hidden[i]))*Math.exp(-hidden[i])*(-input[j])*gradient[36+i];
+  for(var i=0; i<8; i++) {
+    for(var j=0; j<18; j++) {
+      gradient[18*i+j] = Math.pow(hidden[i],2)*Math.exp(-hiddensum[i])*input[j]*gradient[144+i];
     }
   }
   
@@ -156,7 +171,10 @@ function valueAndGradientOfBoard(board, weight) {
 
 //need predict to be 1 for a winning board
 function updateWeight(newWeight, predictNew, predict, gradient, alpha){
-  for(var i=0; i<40; i++) {
+
+  //console.log(alpha*(predictNew - predict));
+  for(var i=0; i<152; i++) {
+    //console.log(gradient[i]);
     newWeight[i] = newWeight[i] + alpha*(predictNew - predict)*gradient[i];
   }
 }

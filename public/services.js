@@ -51,3 +51,11 @@ function sendTD0(weights) {
 function getTD0(callback) {
   return getModel('td0', callback);
 }
+
+function initializeWeights(num) {
+  var weights = [];
+  for (var i = 0; i < num; i++) {
+    weights.push((Math.random() - 0.5) / 100);
+  }
+  sendTD0(weights);
+}

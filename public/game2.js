@@ -4,7 +4,7 @@ var currentGrid;
 var xBot;
 var oBot;
 var board;
-var predict
+var predict;
 var weight;
 var newWeight;
 var alpha = .1;
@@ -21,6 +21,7 @@ $(function() {
 
   var handleWin = function(win, winner, parent) {
     parent.addClass(winner + '-won');
+    console.log(winner);
     sendTD0(newWeight);
     if (!oBot || !xBot) {
       window.alert(winner + ' won!');
@@ -42,19 +43,23 @@ $(function() {
   	else {
   	  board += 2 * Math.pow(3, buttonNum);
   	}
-    var info = valueAndGradientOfBoard(board, weight);
-    updateWeight(newWeight, info.output, predict, info.gradient, alpha);
-    predict = info.output;
     
+    var info = valueAndGradientOfBoard(board, weight);
+
     if (checkForWin($(this), ('.' + me + '-selected'))) {
       var win = me === 'X' ? 1 : -1;
-      handleWin(win, me, parent;
+      updateWeight(newWeight, (win + 1) / 2, predict, info.gradient, alpha);
+      handleWin(win, me, parent);
       return;
     }
     else if (parent.children('.X-selected, .O-selected').length === 9) {
+      updateWeight(newWeight, 0.5, predict, info.gradient, alpha);
       handleWin(0, 'No one', parent);
       return;
     }
+
+    updateWeight(newWeight, info.output, predict, info.gradient, alpha);
+    predict = info.output;
 
     isXTurn = !isXTurn;
 
@@ -91,29 +96,29 @@ $(function() {
 });
 
 function Xturn(board) {
-  $('#button' + TDXmove(board, weight, true)).trigger("click");
+  $('#button' + TDXmove(board, weight)).trigger("click");
   return;
 }
 
 function Oturn(board) {
-  $('#button' + TDOmove(board, weight, true)).trigger("click");
+  $('#button' + randMove(board)).trigger("click");
   return;
 }
 
 function resetGame() {
   isXTurn = true;
   currentGrid = -1;
-  xBot = false;
-  oBot = true;
+  xBot = true;
+  oBot = false;
   board = 0;
   getTD0(function(data) {
     weight = data;
+    newWeight = weight.slice(0);
+    predict = valueAndGradientOfBoard(board, weight).output;
     if (xBot) {
       Xturn(board);
     }
   });
-  newWeight = weight;
-  predict = valueAndGradientOfBoard(board, weight);
   $('div').removeClass('X-won O-won no-win X-selected O-selected');
   $('.button').html('');
 }
