@@ -55,17 +55,17 @@ function arrayToBoard(boardArray, rotationNum){
 function Xmove(board, model, opt) {
   return smartMove(board, function(b) {
     return model[b] + 1.1;
-  }, 1, opt);
+  }, 1, opt, false);
 }
 
 function Omove(board, model, opt) {
   //return smartMove(board, model, 2, opt);
   return smartMove(board, function(b) {
     return model[b] + 1.1;
-  }, 2, opt);
+  }, 2, opt, false);
 }
 
-function smartMove(board, model, turn, opt)
+function smartMove(board, model, turn, opt, reward)
 {
   var boardArray = boardToArray(board);
   var move = [];
@@ -78,6 +78,9 @@ function smartMove(board, model, turn, opt)
       var childBoard = boardToNormalForm(board+turn*Math.pow(3,i));
       if (model(childBoard)) {
         move[i] = model(childBoard);
+        if (reward) {
+          move[i] += checkwin(childBoard, turn);
+        }
       }
       else { // model does not contain childBoard
         move[i] = 1.1;
@@ -188,45 +191,29 @@ function TDmove(board, weight, turn, opt) {
 }
 
 function TDXmove(board, weight, opt) {
-  return TDmove(board, weight, 1, opt);
+  return TDmove(board, weight, 1, opt, true);
 }
 
 function TDOmove(board, weight, opt) {
-  return TDmove(board, weight, 2, opt);
+  return TDmove(board, weight, 2, opt, true);
 }
 
-
-/* combined with smart move hopefully works
-function TDmove(board, weight, turn, opt) {
-  var boardArray = boardToArray(board);
-  var move = [];
-  move[-1] = -10;
-  var argmax = -1;
-  var sum = 0;
-  var cutoff = 0;
-  for (var i = 0; i < 9; i++) {
-    if (!boardArray[i]) {
-      var childBoard = boardToNormalForm(board+turn*Math.pow(3,i)); // necessary???
-      move[i] = valueofBoard(childBoard,weight);
-  	  if (move[i] > move[argmax]) {
-  		  argmax = i;
-  	  }
-      sum += move[i]+1; // what value for 1 ??
+function checkwin(board, turn) {
+  boardArray = boardToArray(board);
+  for(int i =0; i<3; i++) {
+    if(boardArray[i] == turn && boardArray[i+3] == turn && boardArray[i+6] == turn) {
+      return 1;
+    }
+    if(boardArray[3*i] == turn && boardArray[3*i+1] == turn && boardArray[3*i+2] == turn) {
+      return 1;
     }
   }
-  if(opt === true){
-    return argmax;
+  
+  if(boardArray[0] == turn && boardArray[4] == turn && boardArray[8] == turn) {
+    return 1;
   }
-  else{
-    var ran = Math.random();
-  	for (var i = 0; i < 9; i++) {
-  	  if(!boardArray[i]) {
-  	    cutoff += (move[i]+1)/sum;
-    		if(cutoff > ran) {
-    		  return i;
-    		}
-  	  }
-  	}
+  if(boardArray[2] == turn && boardArray[4] == turn && boardArray[7] == turn) {
+    return 1;
   }
-} */
-
+  return 0;
+}
