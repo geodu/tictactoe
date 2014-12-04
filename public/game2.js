@@ -1,12 +1,14 @@
 // Game variables
 var isXTurn;
 var currentGrid;
-var xBot;
-var oBot;
+var xBot = false;
+var oBot = false;
 var board;
 var predict;
-var weight;
-var newWeight;
+var weightX;
+var weightO;
+var newWeightX;
+var newWeightO;
 var alpha = .1;
 
 var games = 1.0;
@@ -40,27 +42,25 @@ $(function() {
     showXLabels: 10
   });
 
-  var handleWin = function(winner, parent) {
+  var handleWin = function(winner) {
     games++;
     if (winner === 'X') {
       gamesWon++;
     }
     var label = games % 10 === 0 ? games : '';
     myLineChart.addData([gamesWon / games], label)
-    parent.addClass(winner + '-won');
     console.log(winner);
-    sendTD0(newWeight);
+    sendTD0('X', newWeightX);
     if (!oBot || !xBot) {
       window.alert(winner + ' won!');
     }
     resetGame();
   }
   $('.button').click(function() {
-    var parent = $(this).parent();
     var me = isXTurn ? 'X' : 'O';
     var buttonNum = parseInt($(this).attr('id')[6]);
 
-    if ($(this).is('.X-selected, .O-selected') || parent.is('.X-won, .O-won')) {
+    if ($(this).is('.X-selected, .O-selected')) {
       return;
     }
     $(this).addClass(me + '-selected').html(me);
@@ -71,20 +71,20 @@ $(function() {
   	  board += 2 * Math.pow(3, buttonNum);
   	}
     
-    var info = valueAndGradientOfBoard(board, weight);
+    var info = valueAndGradientOfBoard(board, weightX);
 
     if (checkForWin($(this), ('.' + me + '-selected'))) {
-      updateWeight(newWeight, checkwin(board, 1), predict, info.gradient, alpha);
-      handleWin(me, parent);
+      updateWeight(newWeightX, checkwin(board, 1), predict, info.gradient, alpha);
+      handleWin(me);
       return;
     }
-    else if (parent.children('.X-selected, .O-selected').length === 9) {
-      updateWeight(newWeight, checkwin(board, 1), predict, info.gradient, alpha);
-      handleWin('No one', parent);
+    else if ($('.X-selected, .O-selected').length === 9) {
+      updateWeight(newWeightX, checkwin(board, 1), predict, info.gradient, alpha);
+      handleWin('No one');
       return;
     }
 
-    updateWeight(newWeight, info.output, predict, info.gradient, alpha);
+    updateWeight(newWeightX, info.output, predict, info.gradient, alpha);
     predict = info.output;
 
     isXTurn = !isXTurn;
@@ -95,6 +95,19 @@ $(function() {
     if (!isXTurn && oBot) {
       Oturn(board);
     }
+  });
+  $('#xBot').click(function() {
+    $(this).toggleClass("down");
+    xBot = !xBot;
+    resetGame();
+  });
+  $('#oBot').click(function() {
+    $(this).toggleClass("down");
+    oBot = !oBot;
+    resetGame();
+  });
+  $('#reset').click(function() {
+    resetGame();
   });
 
   function checkForWin(elem, match) {
@@ -122,29 +135,27 @@ $(function() {
 });
 
 function Xturn(board) {
-  $('#button' + TDXmove(board, weight, true)).trigger("click");
+  $('#button' + TDXmove(board, weightX, true)).trigger("click");
   return;
 }
 
 function Oturn(board) {
-  $('#button' + randMove(board)).trigger("click");
+  $('#button' + randMove(board, weightX, true)).trigger("click");
   return;
 }
 
 function resetGame() {
   isXTurn = true;
   currentGrid = -1;
-  xBot = true;
-  oBot = false;
   board = 0;
-  getTD0(function(data) {
-    weight = data;
-    newWeight = weight.slice(0);
-    predict = valueAndGradientOfBoard(board, weight).output;
+  getTD0('X', function(data) {
+    weightX = data;
+    newWeightX = weightX.slice(0);
+    predict = valueAndGradientOfBoard(board, weightX).output;
     if (xBot) {
       Xturn(board);
     }
   });
-  $('div').removeClass('X-won O-won no-win X-selected O-selected');
+  $('div').removeClass('X-selected O-selected');
   $('.button').html('');
 }

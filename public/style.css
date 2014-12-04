@@ -1,5 +1,6 @@
 body {
   text-align: center;
+  font-family: "Roboto", sans-serif;
 }
 .grid {
   width: 110px;
@@ -17,15 +18,6 @@ body {
   vertical-align: middle;
   font-size: 25px;
 }
-.X-won {
-  background-color: #cfc;
-}
-.O-won {
-  background-color: #cdf;
-}
-.no-win {
-  background-color: #ccc;
-}
 .X-selected {
   color: #080;
 }
@@ -33,6 +25,16 @@ body {
   color: #008;
 }
 #game {
+  padding-top: 5px;
   left: 0px;
   right: 0px;
+}
+.game-control {
+  display: inline-block;
+  background: #ccc;
+  cursor: pointer;
+  padding: 5px 5px;     
+}
+.game-control.down {
+  background: #bbb;
 }

@@ -1,8 +1,8 @@
 // Game variables
 var isXTurn;
 var currentGrid;
-var xBot = true;
-var oBot = true;
+var xBot = false;
+var oBot = false;
 var board;
 var seq;
 var model;
@@ -38,7 +38,7 @@ $(function() {
     showXLabels: 10
   });
 
-  var handleWin = function(win, winner, parent, seq) {
+  var handleWin = function(win, winner, seq) {
     games++;
     if (win) {
       gamesWon++;
@@ -53,7 +53,6 @@ $(function() {
       vals.push(win);
       win = -win;
     }
-    parent.addClass(winner + '-won');
     sendMC(seq, vals);
     if (!oBot || !xBot) {
       window.alert(winner + ' won!');
@@ -61,11 +60,10 @@ $(function() {
     resetGame();
   }
   $('.button').click(function() {
-    var parent = $(this).parent();
     var me = isXTurn ? 'X' : 'O';
     var buttonNum = parseInt($(this).attr('id')[6]);
 
-    if ($(this).is('.X-selected, .O-selected') || parent.is('.X-won, .O-won')) {
+    if ($(this).is('.X-selected, .O-selected')) {
       return;
     }
     $(this).addClass(me + '-selected').html(me);
@@ -78,11 +76,11 @@ $(function() {
   	seq.push(boardToNormalForm(board));
     if (checkForWin($(this), ('.' + me + '-selected'))) {
       var win = me === 'X' ? 1 : -1;
-      handleWin(win, me, parent, seq);
+      handleWin(win, me, seq);
       return;
     }
-    else if (parent.children('.X-selected, .O-selected').length === 9) {
-      handleWin(0, 'No one', parent, seq);
+    else if ($('.X-selected, .O-selected').length === 9) {
+      handleWin(0, 'No one', seq);
       return;
     }
 
@@ -94,6 +92,19 @@ $(function() {
     if (!isXTurn && oBot) {
       Oturn(board);
     }
+  });
+  $('#xBot').click(function() {
+    $(this).toggleClass("down");
+    xBot = !xBot;
+    resetGame();
+  });
+  $('#oBot').click(function() {
+    $(this).toggleClass("down");
+    oBot = !oBot;
+    resetGame();
+  });
+  $('#reset').click(function() {
+    resetGame();
   });
 
   function checkForWin(elem, match) {
@@ -143,6 +154,6 @@ function resetGame() {
       Xturn(board);
     }
   });
-  $('div').removeClass('X-won O-won no-win X-selected O-selected');
+  $('div').removeClass('X-selected O-selected');
   $('.button').html('');
 }

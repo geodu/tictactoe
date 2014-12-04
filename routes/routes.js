@@ -64,15 +64,15 @@ router.put('/mc', function(request, response) {
   });
 });
 
-router.get('/td0', function(request, response) {
-  Weight.findOne({name: 'TD0'}, function(err, doc) {
+router.get('/td0/:id', function(request, response) {
+  Weight.findOne({name: request.params.id}, function(err, doc) {
     response.json(doc.weights);
   });
 });
 
 router.post('/td0', function(request, response) {
   var weights = request.body.weights;
-  Weight.findOne({name: 'TD0'}, function(err, doc) {
+  Weight.findOne({name: request.body.name}, function(err, doc) {
     doc.weights = weights.map(Number);
     doc.save(function(err, doc) {
       response.json({success: true});
@@ -81,9 +81,9 @@ router.post('/td0', function(request, response) {
 });
 
 router.put('/td0', function(request, response) {
-  Weight.remove({name: 'TD0'}, function(err, doc) {});
+  Weight.remove({name: request.body.name}, function(err, doc) {});
   var newModel = new Weight({
-    name: 'TD0',
+    name: request.body.name,
     weights: []
   });
   newModel.save(function(err, doc) {

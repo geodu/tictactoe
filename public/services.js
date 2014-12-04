@@ -33,12 +33,15 @@ function getMC(callback) {
   return getModel('mc', callback);
 }
 
-function sendTD0(weights) {
+function sendTD0(name, weights) {
   $.ajax({
     type: 'POST',
     url: MODELS_PATH + 'td0',
     dataType: 'json',
-    data: { weights: weights },
+    data: {
+      name: name,
+      weights: weights
+    },
     success : function(data) {
       //console.log(data);
     },
@@ -48,8 +51,8 @@ function sendTD0(weights) {
   });
 }
 
-function getTD0(callback) {
-  return getModel('td0', callback);
+function getTD0(name, callback) {
+  return getModel('td0/' + name, callback);
 }
 
 function initializeWeights(num) {
@@ -57,5 +60,5 @@ function initializeWeights(num) {
   for (var i = 0; i < num; i++) {
     weights.push((Math.random() - 0.5) / 100);
   }
-  sendTD0(weights);
+  sendTD0('X', weights);
 }

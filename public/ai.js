@@ -105,7 +105,7 @@ function smartMove(board, model, turn, opt, reward)
       sum += move[i];
     }
   }
-  if(opt === true){
+  if (opt === true) {
     return argmax;
   }
   else{
@@ -243,8 +243,16 @@ function updateWeight(newWeight, predictNew, predict, gradient, alpha){
 
 
 function TDmove(board, weight, turn, opt) {
-  function model(b) {
-    return valueAndGradientOfBoard(b,weight).output;
+  var model;
+  if (turn === 1) {
+    model = function (b) {
+      return valueAndGradientOfBoard(b,weight).output;
+    }
+  }
+  else {
+    model = function (b) {
+      return 1 - valueAndGradientOfBoard(b,weight).output;
+    }
   }
   var returned = smartMove(board, model, turn, opt, true);
   //console.log(returned);
