@@ -48,12 +48,12 @@ $(function() {
 
     if (checkForWin($(this), ('.' + me + '-selected'))) {
       var win = me === 'X' ? 1 : -1;
-      updateWeight(newWeight, info.output + (win + 1) / 2, predict, info.gradient, alpha);
+      updateWeight(newWeight, info.output + checkwin(board, 1), predict, info.gradient, alpha);
       handleWin(win, me, parent);
       return;
     }
     else if (parent.children('.X-selected, .O-selected').length === 9) {
-      updateWeight(newWeight, info.output + 0.5, predict, info.gradient, alpha);
+      updateWeight(newWeight, info.output + checkwin(board, 1), predict, info.gradient, alpha);
       handleWin(0, 'No one', parent);
       return;
     }
@@ -96,7 +96,7 @@ $(function() {
 });
 
 function Xturn(board) {
-  $('#button' + TDXmove(board, weight)).trigger("click");
+  $('#button' + TDXmove(board, weight, !oBot)).trigger("click");
   return;
 }
 

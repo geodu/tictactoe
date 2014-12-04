@@ -106,6 +106,15 @@ function smartMove(board, model, turn, opt, reward)
   	}
   }
 }
+function fuckyoumove(board){
+  boardArray = boardToArray(board);
+  moveOrder = [0,6,3,1,2,4,5,7,8];
+  for (var i = 0; i < 9; i++) {
+    if(!boardArray[moveOrder[i]]) {
+      return moveOrder[i];
+    }
+  }
+}
 
 function randMove(board) {
   var boardArray = boardToArray(board);
@@ -187,20 +196,20 @@ function TDmove(board, weight, turn, opt) {
   function model(b) {
     return valueAndGradientOfBoard(b,weight).output;
   }
-  return smartMove(board, model, turn, opt);
+  return smartMove(board, model, turn, opt, true);
 }
 
 function TDXmove(board, weight, opt) {
-  return TDmove(board, weight, 1, opt, true);
+  return TDmove(board, weight, 1, opt);
 }
 
 function TDOmove(board, weight, opt) {
-  return TDmove(board, weight, 2, opt, true);
+  return TDmove(board, weight, 2, opt);
 }
 
 function checkwin(board, turn) {
   boardArray = boardToArray(board);
-  for(int i =0; i<3; i++) {
+  for(var i =0; i<3; i++) {
     if(boardArray[i] == turn && boardArray[i+3] == turn && boardArray[i+6] == turn) {
       return 1;
     }
@@ -212,8 +221,13 @@ function checkwin(board, turn) {
   if(boardArray[0] == turn && boardArray[4] == turn && boardArray[8] == turn) {
     return 1;
   }
-  if(boardArray[2] == turn && boardArray[4] == turn && boardArray[7] == turn) {
+  if(boardArray[2] == turn && boardArray[4] == turn && boardArray[6] == turn) {
     return 1;
   }
-  return 0;
+  for(var i =0; i<9; i++) {
+    if(boardArray[i] = 0) {
+      return -1
+    }
+  }
+  return 0
 }
