@@ -9,6 +9,9 @@ var weight;
 var newWeight;
 var alpha = .1;
 
+var games = 1.0;
+var gamesWon = 1.0;
+
 $(function() {
   for (var j = 0; j < 9; j++) {
     $('#grid').append('<div class="button" id="button' + j + '"></div>');
@@ -18,10 +21,10 @@ $(function() {
   }
   var ctx = $("#myChart").get(0).getContext("2d");
   var data = {
-    labels: [0, 1],
+    labels: [0, ''],
     datasets: [
       {
-        label: "My First dataset",
+        label: "Win rate",
         fillColor: "rgba(220,220,220,0.2)",
         strokeColor: "rgba(220,220,220,1)",
         pointColor: "rgba(220,220,220,1)",
@@ -32,9 +35,18 @@ $(function() {
       }
     ]
   };
-  var myLineChart = new Chart(ctx).Line(data, {});
+  var myLineChart = new Chart(ctx).Line(data, {
+    animation: false,
+    showXLabels: 10
+  });
 
-  var handleWin = function(win, winner, parent) {
+  var handleWin = function(winner, parent) {
+    games++;
+    if (winner === 'X') {
+      gamesWon++;
+    }
+    var label = games % 10 === 0 ? games : '';
+    myLineChart.addData([gamesWon / games], label)
     parent.addClass(winner + '-won');
     console.log(winner);
     sendTD0(newWeight);
@@ -62,14 +74,13 @@ $(function() {
     var info = valueAndGradientOfBoard(board, weight);
 
     if (checkForWin($(this), ('.' + me + '-selected'))) {
-      var win = me === 'X' ? 1 : -1;
-      updateWeight(newWeight, info.output + checkwin(board, 1), predict, info.gradient, alpha);
-      handleWin(win, me, parent);
+      updateWeight(newWeight, checkwin(board, 1), predict, info.gradient, alpha);
+      handleWin(me, parent);
       return;
     }
     else if (parent.children('.X-selected, .O-selected').length === 9) {
-      updateWeight(newWeight, info.output + checkwin(board, 1), predict, info.gradient, alpha);
-      handleWin(0, 'No one', parent);
+      updateWeight(newWeight, checkwin(board, 1), predict, info.gradient, alpha);
+      handleWin('No one', parent);
       return;
     }
 
@@ -124,7 +135,7 @@ function resetGame() {
   isXTurn = true;
   currentGrid = -1;
   xBot = true;
-  oBot = true;
+  oBot = false;
   board = 0;
   getTD0(function(data) {
     weight = data;

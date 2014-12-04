@@ -82,15 +82,16 @@ function smartMove(board, model, turn, opt, reward)
 {
   var boardArray = boardToArray(board);
   var move = [];
-  move[-1] = -10;
+  move[-1] = -100000000;
   var argmax = -1;
   var sum = 0;
   var cutoff = 0;
   for (var i = 0; i < 9; i++) {
     if (!boardArray[i]) {
-      var childBoard = boardToNormalForm(board+turn*Math.pow(3,i));
-      if (model(childBoard)) {
-        move[i] = model(childBoard);
+      var childBoard = board+turn*Math.pow(3,i);//boardToNormalForm(board+turn*Math.pow(3,i));
+      var modelValue = model(childBoard);
+      if (modelValue) {
+        move[i] = modelValue;
         if (reward) {
           move[i] += checkwin(childBoard, turn);
         }
@@ -153,24 +154,37 @@ function valueAndGradientOfBoard(board, weight) {
   var boardRows = boardToRows(board);
   for (var i = 0; i < boardRows.length; i++) {
     var line = boardRows[i];
-    input.push(line[0] === 1 && line[1] === 1 && line[2] === 1);
-    input.push(line[0] === 2 && line[1] === 2 && line[2] === 2);
-    input.push(line[0] === 0 && line[1] === 2 && line[2] === 2);
-    input.push(line[0] === 2 && line[1] === 0 && line[2] === 2);
-    input.push(line[0] === 2 && line[1] === 2 && line[2] === 0);
-    input.push(line[0] === 0 && line[1] === 1 && line[2] === 1);
-    input.push(line[0] === 1 && line[1] === 0 && line[2] === 1);
-    input.push(line[0] === 1 && line[1] === 1 && line[2] === 0);
+    var count1 = 0;
+    var count2 = 0;
+    for (var j = 0; j < line.length; j++) {
+      if (line[j] === 1) {
+        count1++;
+      }
+      else if (line[j] === 2) {
+        count2++;
+      }
+    }
+    input.push(count2 === 3 ? 1 : 0);
+    input.push(count1 === 3 ? 1 : 0);
+    input.push(count1 === 2 && count2 === 0 ? 1 : 0);
+    input.push(count2 === 2 && count1 === 0 ? 1 : 0);
   }
+
+  console.log(input);
   
   var output = 0;
   for (var i = 0; i <weight.length; i++) {
     output += input[i]*weight[i];
   }
+
+  var gradient = [];
+  for(var i=0; i<50; i++) {
+    gradient[i] = Math.pow(output,2)*Math.exp(-output)*input[i];
+  }
   
   return {
-    output: output,
-    gradient: input
+    output: sigmoid(output),
+    gradient: gradient
   };
 }
 /*
@@ -220,9 +234,8 @@ function valueAndGradientOfBoard(board, weight) {
 */
 
 function updateWeight(newWeight, predictNew, predict, gradient, alpha){
-
-  //console.log(alpha*(predictNew - predict));
-  for(var i=0; i<152; i++) {
+  console.log(alpha*(predictNew - predict));
+  for(var i=0; i<50; i++) {
     //console.log(gradient[i]);
     newWeight[i] = newWeight[i] + alpha*(predictNew - predict)*gradient[i];
   }
@@ -233,7 +246,9 @@ function TDmove(board, weight, turn, opt) {
   function model(b) {
     return valueAndGradientOfBoard(b,weight).output;
   }
-  return smartMove(board, model, turn, opt, true);
+  var returned = smartMove(board, model, turn, opt, true);
+  //console.log(returned);
+  return returned;
 }
 
 function TDXmove(board, weight, opt) {
