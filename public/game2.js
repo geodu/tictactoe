@@ -10,14 +10,29 @@ var newWeight;
 var alpha = .1;
 
 $(function() {
-  $('body').append('<div id="game"></div>');
-  $('#game').append('<div class="grid" id="grid"></div>');
   for (var j = 0; j < 9; j++) {
     $('#grid').append('<div class="button" id="button' + j + '"></div>');
     if (j % 3 === 2) {
       $('#grid').append('<br />');
     }
   }
+  var ctx = $("#myChart").get(0).getContext("2d");
+  var data = {
+    labels: [0, 1],
+    datasets: [
+      {
+        label: "My First dataset",
+        fillColor: "rgba(220,220,220,0.2)",
+        strokeColor: "rgba(220,220,220,1)",
+        pointColor: "rgba(220,220,220,1)",
+        pointStrokeColor: "#fff",
+        pointHighlightFill: "#fff",
+        pointHighlightStroke: "rgba(220,220,220,1)",
+        data: [0, 1]
+      }
+    ]
+  };
+  var myLineChart = new Chart(ctx).Line(data, {});
 
   var handleWin = function(win, winner, parent) {
     parent.addClass(winner + '-won');
@@ -96,7 +111,7 @@ $(function() {
 });
 
 function Xturn(board) {
-  $('#button' + TDXmove(board, weight)).trigger("click");
+  $('#button' + TDXmove(board, weight, true)).trigger("click");
   return;
 }
 

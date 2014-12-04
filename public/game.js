@@ -1,23 +1,53 @@
 // Game variables
 var isXTurn;
 var currentGrid;
-var xBot;
-var oBot;
+var xBot = true;
+var oBot = true;
 var board;
 var seq;
 var model;
 
+var games = 1.0;
+var gamesWon = 1.0;
+
 $(function() {
-  $('body').append('<div id="game"></div>');
-  $('#game').append('<div class="grid" id="grid"></div>');
   for (var j = 0; j < 9; j++) {
     $('#grid').append('<div class="button" id="button' + j + '"></div>');
     if (j % 3 === 2) {
       $('#grid').append('<br />');
     }
   }
+  var ctx = $("#myChart").get(0).getContext("2d");
+  var data = {
+    labels: [0, ''],
+    datasets: [
+      {
+        label: "Win rate",
+        fillColor: "rgba(220,220,220,0.2)",
+        strokeColor: "rgba(220,220,220,1)",
+        pointColor: "rgba(220,220,220,1)",
+        pointStrokeColor: "#fff",
+        pointHighlightFill: "#fff",
+        pointHighlightStroke: "rgba(220,220,220,1)",
+        data: [0, 1]
+      }
+    ]
+  };
+  var myLineChart = new Chart(ctx).Line(data, {
+    animation: false,
+    showXLabels: 10
+  });
 
   var handleWin = function(win, winner, parent, seq) {
+    games++;
+    if (win) {
+      gamesWon++;
+    }
+    if (games === 100) {
+      oBot = false;
+    }
+    var label = games % 10 === 0 ? games : '';
+    myLineChart.addData([gamesWon / games], label)
     var vals = [];
     for (var i=0; i<seq.length; i++) {
       vals.push(win);
@@ -98,15 +128,13 @@ function Xturn(board) {
 
 function Oturn(board) {
   // use opt
-  $('#button' + Omove(board, model, true)).trigger("click");
+  $('#button' + randMove(board, model, true)).trigger("click");
   return;
 }
 
 function resetGame() {
   isXTurn = true;
   currentGrid = -1;
-  xBot = false;
-  oBot = true;
   board = 0;
   seq = [];
   getMC(function(data) {

@@ -200,7 +200,7 @@ function TDOmove(board, weight, opt) {
 
 function checkwin(board, turn) {
   boardArray = boardToArray(board);
-  for(int i =0; i<3; i++) {
+  for(var i =0; i<3; i++) {
     if(boardArray[i] == turn && boardArray[i+3] == turn && boardArray[i+6] == turn) {
       return 1;
     }
@@ -212,7 +212,7 @@ function checkwin(board, turn) {
   if(boardArray[0] == turn && boardArray[4] == turn && boardArray[8] == turn) {
     return 1;
   }
-  if(boardArray[2] == turn && boardArray[4] == turn && boardArray[7] == turn) {
+  if(boardArray[2] == turn && boardArray[4] == turn && boardArray[6] == turn) {
     return 1;
   }
   return 0;

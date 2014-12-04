@@ -3,12 +3,19 @@
   <title>Tic-Tac-Toe</title>
   <link rel="stylesheet" type="text/css" href="style.css">
   <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+  <script type="text/javascript" src="chart.min.js"></script>
   <script type="text/javascript" src="ai.js"></script>
   <script type="text/javascript" src="services.js"></script>
   <script type="text/javascript" src="game2.js"></script>
 </head>
 <body>
-  <h1>Tic-Tac-Toe!</h1>
-  <p><a href="#" onclick="resetGame()">Restart</a></p>
+  <h1>Tic-Tac-Toe</h1>
+  <a href="#" onclick="resetGame()">Restart</a>
+  <div id="game">
+    <div class="grid" id="grid"></div>
+  </div>
+  <div>
+    <canvas id="myChart" width="400" height="300"></canvas>
+  </div>
 </body>
 </html>

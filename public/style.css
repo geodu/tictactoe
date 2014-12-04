@@ -1,17 +1,14 @@
 body {
   text-align: center;
 }
-div {
-  display: inline-block;
-}
 .grid {
+  width: 110px;
+  margin: 0 auto;
   padding: 5px;
   border: solid 1px #300;
 }
-.current-grid {
-  background-color: #ff0;
-}
 .button {
+  display: inline-block;
   background-color: #eee;
   width: 25px;
   height: 25px;
@@ -36,7 +33,6 @@ div {
   color: #008;
 }
 #game {
-  position: absolute;
   left: 0px;
   right: 0px;
 }
