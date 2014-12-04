@@ -124,7 +124,7 @@ function resetGame() {
   isXTurn = true;
   currentGrid = -1;
   xBot = true;
-  oBot = false;
+  oBot = true;
   board = 0;
   getTD0(function(data) {
     weight = data;
