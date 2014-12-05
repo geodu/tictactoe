@@ -50,7 +50,9 @@ $(function() {
     var label = games % 10 === 0 ? games : '';
     myLineChart.addData([gamesWon / games], label)
     console.log(winner);
+    console.log(board);
     sendTD0('X', newWeightX);
+    sendTD0('O', newWeightO);
     if (!oBot || !xBot) {
       window.alert(winner + ' won!');
     }
@@ -71,22 +73,27 @@ $(function() {
   	  board += 2 * Math.pow(3, buttonNum);
   	}
     
-    var info = valueAndGradientOfBoard(board, weightX);
+    var infoX = valueAndGradientOfBoard(board, weightX);
+    var infoO = valueAndGradientOfBoard(board, weightO);
 
     if (checkForWin($(this), ('.' + me + '-selected'))) {
-      updateWeight(newWeightX, checkwin(board, 1), predict, info.gradient, alpha);
+      updateWeight(newWeightX, checkwin(board, 1), predictX, infoX.gradient, alpha);
+      updateWeight(newWeightO, checkwin(board, 2), predictO, infoO.gradient, alpha);
       handleWin(me);
       return;
     }
     else if ($('.X-selected, .O-selected').length === 9) {
-      updateWeight(newWeightX, checkwin(board, 1), predict, info.gradient, alpha);
+      updateWeight(newWeightX, checkwin(board, 1), predictX, infoX.gradient, alpha);
+      updateWeight(newWeightO, checkwin(board, 2), predictO, infoO.gradient, alpha);
       handleWin('No one');
       return;
     }
 
-    updateWeight(newWeightX, info.output, predict, info.gradient, alpha);
-    predict = info.output;
-
+    updateWeight(newWeightX, infoX.output, predictX, infoX.gradient, alpha);
+    updateWeight(newWeightO, infoO.output, predictO, infoO.gradient, alpha);
+    predictX = infoX.output;
+    predictO = infoO.output;
+    
     isXTurn = !isXTurn;
 
     if (isXTurn && xBot) {
@@ -140,7 +147,7 @@ function Xturn(board) {
 }
 
 function Oturn(board) {
-  $('#button' + randMove(board, weightX, true)).trigger("click");
+  $('#button' + TDOmove(board, weightO, true)).trigger("click");
   return;
 }
 
@@ -151,10 +158,15 @@ function resetGame() {
   getTD0('X', function(data) {
     weightX = data;
     newWeightX = weightX.slice(0);
-    predict = valueAndGradientOfBoard(board, weightX).output;
+    predictX = valueAndGradientOfBoard(board, weightX).output;
     if (xBot) {
       Xturn(board);
     }
+  });
+  getTD0('O', function(data) {
+    weightO = data;
+    newWeightO = weightO.slice(0);
+    predictO = valueAndGradientOfBoard(board, weightO).output;
   });
   $('div').removeClass('X-selected O-selected');
   $('.button').html('');

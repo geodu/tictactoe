@@ -58,7 +58,12 @@ function getTD0(name, callback) {
 function initializeWeights(num) {
   var weights = [];
   for (var i = 0; i < num; i++) {
-    weights.push((Math.random() - 0.5) / 100);
+    weights.push((Math.random() - 0.5) / 10);
   }
   sendTD0('X', weights);
+  weights = [];
+  for (var i = 0; i < num; i++) {
+    weights.push((Math.random() - 0.5) / 10);
+  }
+  sendTD0('O', weights);
 }

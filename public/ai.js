@@ -170,16 +170,16 @@ function valueAndGradientOfBoard(board, weight) {
     input.push(count2 === 2 && count1 === 0 ? 1 : 0);
   }
 
-  console.log(input);
-  
+  //console.log(input);
+  //console.log(weight);
   var output = 0;
   for (var i = 0; i <weight.length; i++) {
     output += input[i]*weight[i];
   }
-
+  //console.log(output);
   var gradient = [];
   for(var i=0; i<50; i++) {
-    gradient[i] = Math.pow(output,2)*Math.exp(-output)*input[i];
+    gradient[i] = Math.pow(1+Math.exp(-output),-2)*Math.exp(-output)*input[i];
   }
   
   return {
@@ -234,7 +234,7 @@ function valueAndGradientOfBoard(board, weight) {
 */
 
 function updateWeight(newWeight, predictNew, predict, gradient, alpha){
-  console.log(alpha*(predictNew - predict));
+  //console.log(gradient);
   for(var i=0; i<50; i++) {
     //console.log(gradient[i]);
     newWeight[i] = newWeight[i] + alpha*(predictNew - predict)*gradient[i];
@@ -244,6 +244,10 @@ function updateWeight(newWeight, predictNew, predict, gradient, alpha){
 
 function TDmove(board, weight, turn, opt) {
   var model;
+  model = function (b) {
+      return valueAndGradientOfBoard(b,weight).output;
+    }
+  /*
   if (turn === 1) {
     model = function (b) {
       return valueAndGradientOfBoard(b,weight).output;
@@ -253,7 +257,8 @@ function TDmove(board, weight, turn, opt) {
     model = function (b) {
       return 1 - valueAndGradientOfBoard(b,weight).output;
     }
-  }
+  }*/
+  
   var returned = smartMove(board, model, turn, opt, true);
   //console.log(returned);
   return returned;
@@ -292,7 +297,7 @@ function checkwin(board, turn) {
     return 1;
   }
   if (checkWinHelper(board, 3-turn)) {
-    return 0;
+    return 0.5;
   }
-  return 0.5;
+  return 0;
 }
