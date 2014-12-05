@@ -90,7 +90,7 @@ function smartMove(board, model, turn, opt, reward)
     if (!boardArray[i]) {
       var childBoard = board+turn*Math.pow(3,i);//boardToNormalForm(board+turn*Math.pow(3,i));
       var modelValue = model(childBoard);
-      if (modelValue) {
+      if (modelValue !== undefined) {
         move[i] = modelValue;
         if (reward) {
           move[i] += checkwin(childBoard, turn);
@@ -147,11 +147,15 @@ function valueAndGradientOfBoard(board, weight) {
   var boardArray = boardToArray(board);
   var changeEntries = [0.0, 1.0, 0.0];
   var changeEntries2 = [0.0, 0.0, 1.0];
-  for (var i=0; i<9; i++) {
-    input[i] = changeEntries[boardArray[i]];
-    input[i + 9] = changeEntries2[boardArray[i]];
-  }
+  input.push(changeEntries[boardArray[0]] + changeEntries[boardArray[2]] + changeEntries[boardArray[6]] + changeEntries[boardArray[8]]);
+  input.push(changeEntries[boardArray[1]] + changeEntries[boardArray[3]] + changeEntries[boardArray[5]] + changeEntries[boardArray[7]]);
+  input.push(changeEntries2[boardArray[0]] + changeEntries2[boardArray[2]] + changeEntries2[boardArray[6]] + changeEntries2[boardArray[8]]);
+  input.push(changeEntries2[boardArray[1]] + changeEntries2[boardArray[3]] + changeEntries2[boardArray[5]] + changeEntries2[boardArray[7]]);
+  input.push(changeEntries[boardArray[4]]);
+  input.push(changeEntries2[boardArray[4]]);
   var boardRows = boardToRows(board);
+  var countX = 0;
+  var countY = 0;
   for (var i = 0; i < boardRows.length; i++) {
     var line = boardRows[i];
     var count1 = 0;
@@ -164,13 +168,11 @@ function valueAndGradientOfBoard(board, weight) {
         count2++;
       }
     }
-    input.push(count2 === 3 ? 1 : 0);
-    input.push(count1 === 3 ? 1 : 0);
-    input.push(count1 === 2 && count2 === 0 ? 1 : 0);
-    input.push(count2 === 2 && count1 === 0 ? 1 : 0);
+    countX += count1 === 2 && count2 === 0 ? 1 : 0;
+    countY += count2 === 2 && count1 === 0 ? 1 : 0;
   }
-
-  //console.log(input);
+  input.push(countX);
+  input.push(countY);
   //console.log(weight);
   var output = 0;
   for (var i = 0; i <weight.length; i++) {
@@ -178,7 +180,7 @@ function valueAndGradientOfBoard(board, weight) {
   }
   //console.log(output);
   var gradient = [];
-  for(var i=0; i<50; i++) {
+  for(var i=0; i<8; i++) {
     gradient[i] = Math.pow(1+Math.exp(-output),-2)*Math.exp(-output)*input[i];
   }
   
@@ -235,7 +237,7 @@ function valueAndGradientOfBoard(board, weight) {
 
 function updateWeight(newWeight, predictNew, predict, gradient, alpha){
   //console.log(gradient);
-  for(var i=0; i<50; i++) {
+  for(var i=0; i<8; i++) {
     //console.log(gradient[i]);
     newWeight[i] = newWeight[i] + alpha*(predictNew - predict)*gradient[i];
   }

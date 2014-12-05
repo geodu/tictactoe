@@ -4,7 +4,10 @@ var currentGrid;
 var xBot = false;
 var oBot = false;
 var board;
-var predict;
+var predictX;
+var predictO;
+var gradientX;
+var gradientO;
 var weightX;
 var weightO;
 var newWeightX;
@@ -77,22 +80,27 @@ $(function() {
     var infoO = valueAndGradientOfBoard(board, weightO);
 
     if (checkForWin($(this), ('.' + me + '-selected'))) {
-      updateWeight(newWeightX, checkwin(board, 1), predictX, infoX.gradient, alpha);
-      updateWeight(newWeightO, checkwin(board, 2), predictO, infoO.gradient, alpha);
+      updateWeight(newWeightX, checkwin(board, 1), predictX, gradientX, alpha);
+      updateWeight(newWeightO, checkwin(board, 2), predictO, gradientO, alpha);
       handleWin(me);
       return;
     }
     else if ($('.X-selected, .O-selected').length === 9) {
-      updateWeight(newWeightX, checkwin(board, 1), predictX, infoX.gradient, alpha);
-      updateWeight(newWeightO, checkwin(board, 2), predictO, infoO.gradient, alpha);
+      updateWeight(newWeightX, checkwin(board, 1), predictX, gradientX, alpha);
+      updateWeight(newWeightO, checkwin(board, 2), predictO, gradientO, alpha);
       handleWin('No one');
       return;
     }
-
-    updateWeight(newWeightX, infoX.output, predictX, infoX.gradient, alpha);
-    updateWeight(newWeightO, infoO.output, predictO, infoO.gradient, alpha);
+    if (me === 'X') {
+      updateWeight(newWeightX, infoX.output, predictX, gradientX, alpha);
+    }
+    else {
+      updateWeight(newWeightO, infoO.output, predictO, gradientO, alpha);
+    }
     predictX = infoX.output;
+    gradientX = infoX.gradient;
     predictO = infoO.output;
+    gradientO = infoO.gradient;
     
     isXTurn = !isXTurn;
 
@@ -147,7 +155,7 @@ function Xturn(board) {
 }
 
 function Oturn(board) {
-  $('#button' + TDOmove(board, weightO, true)).trigger("click");
+  $('#button' + TDOmove(board, weightO, false)).trigger("click");
   return;
 }
 
@@ -158,7 +166,9 @@ function resetGame() {
   getTD0('X', function(data) {
     weightX = data;
     newWeightX = weightX.slice(0);
-    predictX = valueAndGradientOfBoard(board, weightX).output;
+    var valGrad = valueAndGradientOfBoard(board, weightX);
+    predictX = valGrad.output;
+    gradientX = valGrad.gradient;
     if (xBot) {
       Xturn(board);
     }
@@ -166,7 +176,9 @@ function resetGame() {
   getTD0('O', function(data) {
     weightO = data;
     newWeightO = weightO.slice(0);
-    predictO = valueAndGradientOfBoard(board, weightO).output;
+    var valGrad = valueAndGradientOfBoard(board, weightO);
+    predictO = valGrad.output;
+    gradientO = valGrad.gradient;
   });
   $('div').removeClass('X-selected O-selected');
   $('.button').html('');
