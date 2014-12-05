@@ -14,8 +14,12 @@ var newWeightX;
 var newWeightO;
 var alpha = .1;
 
-var games = 1.0;
-var gamesWon = 1.0;
+var games = 0;
+var gameArray = [];
+var gamesWon = 0.0;
+var gamesWonAndTied = 0.0;
+var totalGamesWon = 0.0;
+var totalGamesWonAndTied = 0.0;
 
 $(function() {
   for (var j = 0; j < 9; j++) {
@@ -40,18 +44,73 @@ $(function() {
       }
     ]
   };
-  var myLineChart = new Chart(ctx).Line(data, {
-    animation: false,
-    showXLabels: 10
-  });
+  var myLineChart;
 
   var handleWin = function(winner) {
     games++;
+    gameArray.push(winner);
     if (winner === 'X') {
       gamesWon++;
+      gamesWonAndTied++;
+      totalGamesWon++;
+      totalGamesWonAndTied++;
     }
-    var label = games % 10 === 0 ? games : '';
-    myLineChart.addData([gamesWon / games], label)
+    else if (winner !== 'O') {
+      gamesWonAndTied++;
+      totalGamesWonAndTied++;
+    }
+    if (gameArray.length === 1) {
+      var data = {
+        labels: [0, ''],
+        datasets: [
+          {
+            label: "Win rate",
+            fillColor: "rgba(220,120,20,0.5)",
+            strokeColor: "rgba(220,220,220,1)",
+            pointColor: "rgba(220,120,20,1)",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(220,220,220,1)",
+            data: [0, gamesWon]
+          },
+          {
+            label: "Win and tie rate",
+            fillColor: "rgba(20,120,220,0.5)",
+            strokeColor: "rgba(20,120,220,1)",
+            pointColor: "rgba(20,120,220,1)",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(220,220,220,1)",
+            data: [0, gamesWonAndTied]
+          },
+        ]
+      };
+      myLineChart = new Chart(ctx).Line(data, {
+        animation: false,
+        bezierCurve: false,
+        pointDot: false,
+        showTooltips: false
+      });
+    }
+    else {
+      if (games === 1000) {
+        console.log(totalGamesWon);
+        console.log(totalGamesWonAndTied);
+        oBot = false;
+      }
+      if (gameArray.length > 100) {
+        var removed = gameArray.splice(0, 1)[0];
+        if (removed === 'X') {
+          gamesWon--;
+          gamesWonAndTied--;
+        }
+        else if (removed !== 'O') {
+          gamesWonAndTied--;
+        }
+      }
+      var label = games % 50 === 0 ? games : '';
+      myLineChart.addData([gamesWon / Math.min(games, 100), gamesWonAndTied / Math.min(games, 100)], label)
+    }
     console.log(winner);
     console.log(board);
     sendTD0('X', newWeightX);
@@ -62,30 +121,34 @@ $(function() {
     resetGame();
   }
   $('.button').click(function() {
-    var me = isXTurn ? 'X' : 'O';
-    var buttonNum = parseInt($(this).attr('id')[6]);
-
     if ($(this).is('.X-selected, .O-selected')) {
       return;
     }
-    $(this).addClass(me + '-selected').html(me);
-  	if(isXTurn){
+
+    var me = isXTurn ? 'X' : 'O';
+    var buttonNum = parseInt($(this).attr('id')[6]);
+    if (!xBot || !oBot) {
+      $(this).addClass(me + '-selected').html(me);
+    }
+
+  	if (isXTurn) {
   	  board += Math.pow(3, buttonNum);
   	}
   	else {
   	  board += 2 * Math.pow(3, buttonNum);
   	}
-    
+
     var infoX = valueAndGradientOfBoard(board, weightX);
     var infoO = valueAndGradientOfBoard(board, weightO);
+    var winVal = checkwin(board, isXTurn ? 1 : 2);
 
-    if (checkForWin($(this), ('.' + me + '-selected'))) {
+    if (winVal === 1) {
       updateWeight(newWeightX, checkwin(board, 1), predictX, gradientX, alpha);
       updateWeight(newWeightO, checkwin(board, 2), predictO, gradientO, alpha);
       handleWin(me);
       return;
     }
-    else if ($('.X-selected, .O-selected').length === 9) {
+    else if (winVal === 0.5) {
       updateWeight(newWeightX, checkwin(board, 1), predictX, gradientX, alpha);
       updateWeight(newWeightO, checkwin(board, 2), predictO, gradientO, alpha);
       handleWin('No one');
@@ -101,7 +164,7 @@ $(function() {
     gradientX = infoX.gradient;
     predictO = infoO.output;
     gradientO = infoO.gradient;
-    
+
     isXTurn = !isXTurn;
 
     if (isXTurn && xBot) {
@@ -125,37 +188,16 @@ $(function() {
     resetGame();
   });
 
-  function checkForWin(elem, match) {
-    var index = +(elem.attr('id').slice(-1));
-    var prefix = '#button';
-    // Check rows
-    if (elem.nextUntil('br').add(elem.prevUntil('br')).filter(match).length === 2) {
-      return true;
-    }
-    // Check columns
-    if ($(prefix + (index % 3)).add($(prefix + (index % 3 + 3))).add($(prefix + (index % 3 + 6))).filter(match).length === 3) {
-      return true;
-    }
-    // Check diagonals
-    if ($(prefix + 0).add($(prefix + 4)).add($(prefix + 8)).filter(match).length === 3) {
-      return true;
-    }
-    if ($(prefix + 2).add($(prefix + 4)).add($(prefix + 6)).filter(match).length === 3) {
-      return true;
-    }
-    return false;
-  }
-
   resetGame();
 });
 
 function Xturn(board) {
-  $('#button' + TDXmove(board, weightX, true)).trigger("click");
+  $('#button' + TDXmove(board, weightX, false)).trigger("click");
   return;
 }
 
 function Oturn(board) {
-  $('#button' + TDOmove(board, weightO, true)).trigger("click");
+  $('#button' + TDOmove(board, weightO, false)).trigger("click");
   return;
 }
 

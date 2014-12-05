@@ -7,8 +7,12 @@ var board;
 var seq;
 var model;
 
-var games = 1.0;
-var gamesWon = 1.0;
+var games = 0;
+var gameArray = [];
+var gamesWon = 0.0;
+var gamesWonAndTied = 0.0;
+var totalGamesWon = 0.0;
+var totalGamesWonAndTied = 0.0;
 
 $(function() {
   for (var j = 0; j < 9; j++) {
@@ -18,55 +22,95 @@ $(function() {
     }
   }
   var ctx = $("#myChart").get(0).getContext("2d");
-  var data = {
-    labels: [0, ''],
-    datasets: [
-      {
-        label: "Win rate",
-        fillColor: "rgba(220,220,220,0.2)",
-        strokeColor: "rgba(220,220,220,1)",
-        pointColor: "rgba(220,220,220,1)",
-        pointStrokeColor: "#fff",
-        pointHighlightFill: "#fff",
-        pointHighlightStroke: "rgba(220,220,220,1)",
-        data: [0, 1]
-      }
-    ]
-  };
-  var myLineChart = new Chart(ctx).Line(data, {
-    animation: false,
-    showXLabels: 10
-  });
+  var myLineChart;
 
   var handleWin = function(win, winner, seq) {
     games++;
-    if (win) {
+    gameArray.push(win);
+    if (win === 1) {
       gamesWon++;
+      gamesWonAndTied++;
+      totalGamesWon++;
+      totalGamesWonAndTied++;
     }
-    if (games === 100) {
-      oBot = false;
+    else if (win === 0) {
+      gamesWonAndTied++;
+      totalGamesWonAndTied++;
     }
-    var label = games % 10 === 0 ? games : '';
-    myLineChart.addData([gamesWon / games], label)
+    if (gameArray.length === 1) {
+      var data = {
+        labels: [0, ''],
+        datasets: [
+          {
+            label: "Win rate",
+            fillColor: "rgba(220,120,20,0.5)",
+            strokeColor: "rgba(220,220,220,1)",
+            pointColor: "rgba(220,120,20,1)",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(220,220,220,1)",
+            data: [0, gamesWon]
+          },
+          {
+            label: "Win and tie rate",
+            fillColor: "rgba(20,120,220,0.5)",
+            strokeColor: "rgba(20,120,220,1)",
+            pointColor: "rgba(20,120,220,1)",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(220,220,220,1)",
+            data: [0, gamesWonAndTied]
+          },
+        ]
+      };
+      myLineChart = new Chart(ctx).Line(data, {
+        animation: false,
+        bezierCurve: false,
+        pointDot: false,
+        showTooltips: false
+      });
+    }
+    else {
+      if (games === 1000) {
+        console.log(totalGamesWon);
+        console.log(totalGamesWonAndTied);
+        oBot = false;
+      }
+      if (gameArray.length > 100) {
+        var removed = gameArray.splice(0, 1)[0];
+        if (removed === 1) {
+          gamesWon--;
+          gamesWonAndTied--;
+        }
+        else if (removed === 0) {
+          gamesWonAndTied--;
+        }
+      }
+      var label = games % 50 === 0 ? games : '';
+      myLineChart.addData([gamesWon / Math.min(games, 100), gamesWonAndTied / Math.min(games, 100)], label)
+    }
     var vals = [];
     for (var i=0; i<seq.length; i++) {
       vals.push(win);
       win = -win;
     }
-    sendMC(seq, vals);
+    //sendMC(seq, vals);
     if (!oBot || !xBot) {
       window.alert(winner + ' won!');
     }
     resetGame();
   }
   $('.button').click(function() {
-    var me = isXTurn ? 'X' : 'O';
-    var buttonNum = parseInt($(this).attr('id')[6]);
-
     if ($(this).is('.X-selected, .O-selected')) {
       return;
     }
-    $(this).addClass(me + '-selected').html(me);
+
+    var me = isXTurn ? 'X' : 'O';
+    var buttonNum = parseInt($(this).attr('id')[6]);
+    if (!xBot || !oBot) {
+      $(this).addClass(me + '-selected').html(me);
+    }
+
   	if(isXTurn){
   	  board += Math.pow(3, buttonNum);
   	}
@@ -74,12 +118,14 @@ $(function() {
   	  board += 2 * Math.pow(3, buttonNum);
   	}
   	seq.push(boardToNormalForm(board));
-    if (checkForWin($(this), ('.' + me + '-selected'))) {
+
+    var winVal = checkwin(board, isXTurn ? 1 : 2);
+    if (winVal === 1) {
       var win = me === 'X' ? 1 : -1;
       handleWin(win, me, seq);
       return;
     }
-    else if ($('.X-selected, .O-selected').length === 9) {
+    else if (winVal === 0.5) {
       handleWin(0, 'No one', seq);
       return;
     }
@@ -107,39 +153,18 @@ $(function() {
     resetGame();
   });
 
-  function checkForWin(elem, match) {
-    var index = +(elem.attr('id').slice(-1));
-    var prefix = '#button';
-    // Check rows
-    if (elem.nextUntil('br').add(elem.prevUntil('br')).filter(match).length === 2) {
-      return true;
-    }
-    // Check columns
-    if ($(prefix + (index % 3)).add($(prefix + (index % 3 + 3))).add($(prefix + (index % 3 + 6))).filter(match).length === 3) {
-      return true;
-    }
-    // Check diagonals
-    if ($(prefix + 0).add($(prefix + 4)).add($(prefix + 8)).filter(match).length === 3) {
-      return true;
-    }
-    if ($(prefix + 2).add($(prefix + 4)).add($(prefix + 6)).filter(match).length === 3) {
-      return true;
-    }
-    return false;
-  }
-
   resetGame();
 });
 
 function Xturn(board) {
   // do not use opt
-  $('#button' + Xmove(board, model, true)).trigger("click");
+  $('#button' + randMove(board, model, true)).trigger("click");
   return;
 }
 
 function Oturn(board) {
   // use opt
-  $('#button' + randMove(board, model, true)).trigger("click");
+  $('#button' + Omove(board, model, true)).trigger("click");
   return;
 }
 

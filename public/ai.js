@@ -17,7 +17,7 @@ function boardToRows(board) {
     newBoard.push([boardArray[i], boardArray[i+3], boardArray[i+6]]);
     newBoard.push([boardArray[3*i], boardArray[3*i+1], boardArray[3*i+2]]);
   }
-  
+
   newBoard.push([boardArray[0], boardArray[4], boardArray[8]]);
   newBoard.push([boardArray[2], boardArray[4], boardArray[6]]);
   return newBoard;
@@ -37,7 +37,7 @@ function boardToNormalForm(board){
   rotation[5] = [6,3,0,7,4,1,8,5,2];
   rotation[6] = [8,7,6,5,4,3,2,1,0];
   rotation[7] = [8,5,2,7,4,1,6,3,0];
-  
+
   for(var i=0; i<8; i++){
     newBoard = arrayToBoard(boardArray, rotation[i])
     if (newBoard < minBoard){
@@ -67,14 +67,23 @@ function arrayToBoard(boardArray, rotationNum){
 
 function Xmove(board, model, opt) {
   return smartMove(board, function(b) {
-    return model[b] + 1.1;
+    if (model[b] !== undefined) {
+      return model[b] + 1.1;
+    }
+    else {
+      return 1.1;
+    }
   }, 1, opt, false);
 }
 
 function Omove(board, model, opt) {
-  //return smartMove(board, model, 2, opt);
   return smartMove(board, function(b) {
-    return model[b] + 1.1;
+    if (model[b] !== undefined) {
+      return model[b] + 1.1;
+    }
+    else {
+      return 1.1;
+    }
   }, 2, opt, false);
 }
 
@@ -88,16 +97,11 @@ function smartMove(board, model, turn, opt, reward)
   var cutoff = 0;
   for (var i = 0; i < 9; i++) {
     if (!boardArray[i]) {
-      var childBoard = board+turn*Math.pow(3,i);//boardToNormalForm(board+turn*Math.pow(3,i));
+      var childBoard = /*board+turn*Math.pow(3,i);*/boardToNormalForm(board+turn*Math.pow(3,i));
       var modelValue = model(childBoard);
-      if (modelValue !== undefined) {
-        move[i] = modelValue;
-        if (reward) {
-          move[i] += checkwin(childBoard, turn);
-        }
-      }
-      else { // model does not contain childBoard
-        move[i] = 1.1;
+      move[i] = modelValue;
+      if (reward) {
+        move[i] += checkwin(childBoard, turn);
       }
   	  if (move[i] > move[argmax]) {
   		  argmax = i;
@@ -130,7 +134,7 @@ function randMove(board) {
       sum += 1;
     }
   }
-  
+
   var ran = Math.random();
   for (var i = 0; i < 9; i++) {
     if(!boardArray[i]) {
@@ -173,20 +177,19 @@ function valueAndGradientOfBoard(board, weight) {
   }
   input.push(countX);
   input.push(countY);
-  //console.log(weight);
   var output = 0;
   for (var i = 0; i <weight.length; i++) {
     output += input[i]*weight[i];
   }
-  //console.log(output);
+
   var gradient = [];
   for(var i=0; i<8; i++) {
     gradient[i] = Math.pow(1+Math.exp(-output),-2)*Math.exp(-output)*input[i];
   }
-  
+
   return {
     output: sigmoid(output),
-    gradient: gradient
+    gradient: input
   };
 }
 
@@ -209,25 +212,25 @@ function valueAndGradientOfBoard(board, weight) {
     }
     hidden[i] = sigmoid(hiddensum[i]);
   }
-  
+
   var output = 0;
   var outputsum = 0;
   for(var i=0; i<8; i++) {
     outputsum += weight[144+i]*hidden[i];
   }
   output = sigmoid(outputsum);
-  
+
   var gradient = [];
   for(var i=0; i<8; i++) {
     gradient[144+i] = Math.pow(1+Math.exp(-output),-2)*Math.exp(-outputsum)*hidden[i];
   }
-  
+
   for(var i=0; i<8; i++) {
     for(var j=0; j<18; j++) {
       gradient[18*i+j] = Math.pow(1+Math.exp(-hidden[i]),-2)*Math.exp(-hiddensum[i])*input[j]*gradient[144+i];
     }
   }
-  
+
   return {
     output: output,
     gradient: gradient
@@ -235,10 +238,8 @@ function valueAndGradientOfBoard(board, weight) {
 }
 */
 
-function updateWeight(newWeight, predictNew, predict, gradient, alpha){
-  //console.log(gradient);
+function updateWeight(newWeight, predictNew, predict, gradient, alpha) {
   for(var i=0; i<newWeight.length; i++) {
-    //console.log(gradient[i]);
     newWeight[i] = newWeight[i] + alpha*(predictNew - predict)*gradient[i];
   }
 }
@@ -260,9 +261,8 @@ function TDmove(board, weight, turn, opt) {
       return 1 - valueAndGradientOfBoard(b,weight).output;
     }
   }*/
-  
+
   var returned = smartMove(board, model, turn, opt, true);
-  //console.log(returned);
   return returned;
 }
 
@@ -274,35 +274,40 @@ function TDOmove(board, weight, opt) {
   return TDmove(board, weight, 2, opt);
 }
 
-function checkWinHelper(board, turn) {
-  boardArray = boardToArray(board);
+function checkWinHelper(boardArray, turn) {
   for(var i =0; i<3; i++) {
-    if(boardArray[i] == turn && boardArray[i+3] == turn && boardArray[i+6] == turn) {
+    if(boardArray[i] === turn && boardArray[i+3] === turn && boardArray[i+6] === turn) {
       return true;
     }
-    if(boardArray[3*i] == turn && boardArray[3*i+1] == turn && boardArray[3*i+2] == turn) {
+    if(boardArray[3*i] === turn && boardArray[3*i+1] === turn && boardArray[3*i+2] === turn) {
       return true;
     }
   }
-  
-  if(boardArray[0] == turn && boardArray[4] == turn && boardArray[8] == turn) {
+
+  if(boardArray[0] === turn && boardArray[4] === turn && boardArray[8] === turn) {
     return true;
   }
-  if(boardArray[2] == turn && boardArray[4] == turn && boardArray[6] == turn) {
+  if(boardArray[2] === turn && boardArray[4] === turn && boardArray[6] === turn) {
     return true;
   }
   return false;
 }
 
 function checkwin(board, turn) {
+  var boardArray = boardToArray(board);
   // Turn wins
-  if (checkWinHelper(board, turn)) {
+  if (checkWinHelper(boardArray, turn)) {
     return 1;
   }
   // Turn loses
-  if (checkWinHelper(board, 3-turn)) {
+  if (checkWinHelper(boardArray, 3-turn)) {
     return 0;
   }
-  // Tie
+
+  for (var i = 0; i < 9; i++) {
+    if (boardArray[i] === 0) {
+      return 0;
+    }
+  }
   return 0.5;
 }
