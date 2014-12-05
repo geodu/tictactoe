@@ -189,6 +189,7 @@ function valueAndGradientOfBoard(board, weight) {
     gradient: gradient
   };
 }
+
 /*
 function valueAndGradientOfBoard(board, weight) {
   var input = [];
@@ -218,12 +219,12 @@ function valueAndGradientOfBoard(board, weight) {
   
   var gradient = [];
   for(var i=0; i<8; i++) {
-    gradient[144+i] = Math.pow(output,2)*Math.exp(-outputsum)*hidden[i];
+    gradient[144+i] = Math.pow(1+Math.exp(-output),-2)*Math.exp(-outputsum)*hidden[i];
   }
   
   for(var i=0; i<8; i++) {
     for(var j=0; j<18; j++) {
-      gradient[18*i+j] = Math.pow(hidden[i],2)*Math.exp(-hiddensum[i])*input[j]*gradient[144+i];
+      gradient[18*i+j] = Math.pow(1+Math.exp(-hidden[i]),-2)*Math.exp(-hiddensum[i])*input[j]*gradient[144+i];
     }
   }
   
@@ -231,13 +232,12 @@ function valueAndGradientOfBoard(board, weight) {
     output: output,
     gradient: gradient
   };
-  
 }
 */
 
 function updateWeight(newWeight, predictNew, predict, gradient, alpha){
   //console.log(gradient);
-  for(var i=0; i<8; i++) {
+  for(var i=0; i<newWeight.length; i++) {
     //console.log(gradient[i]);
     newWeight[i] = newWeight[i] + alpha*(predictNew - predict)*gradient[i];
   }
@@ -295,11 +295,14 @@ function checkWinHelper(board, turn) {
 }
 
 function checkwin(board, turn) {
+  // Turn wins
   if (checkWinHelper(board, turn)) {
     return 1;
   }
+  // Turn loses
   if (checkWinHelper(board, 3-turn)) {
-    return 0.5;
+    return 0;
   }
-  return 0;
+  // Tie
+  return 0.5;
 }

@@ -155,7 +155,7 @@ function Xturn(board) {
 }
 
 function Oturn(board) {
-  $('#button' + TDOmove(board, weightO, false)).trigger("click");
+  $('#button' + TDOmove(board, weightO, true)).trigger("click");
   return;
 }
 
